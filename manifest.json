@@ -11,15 +11,57 @@
   "orientation": "portrait",
   "background_color": "#14181f",
   "theme_color": "#14181f",
-  "categories": ["health", "productivity", "lifestyle"],
+  "categories": [
+    "health",
+    "productivity",
+    "lifestyle"
+  ],
   "icons": [
-    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
-    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    {"name": "ملاحظة سريعة", "short_name": "ملاحظة", "url": "./index.html#note"},
-    {"name": "طوارئ: رغبة ملحّة", "short_name": "طوارئ", "url": "./index.html#sos"},
-    {"name": "كيف حالك الآن؟", "short_name": "حالتي", "url": "./index.html#check"},
-    {"name": "الأدوية", "short_name": "الأدوية", "url": "./index.html#meds"}
+    {
+      "name": "ملاحظة سريعة",
+      "short_name": "ملاحظة",
+      "url": "./index.html#note"
+    },
+    {
+      "name": "طوارئ: رغبة ملحّة",
+      "short_name": "طوارئ",
+      "url": "./index.html#sos"
+    },
+    {
+      "name": "كيف حالك الآن؟",
+      "short_name": "حالتي",
+      "url": "./index.html#check"
+    },
+    {
+      "name": "الأدوية",
+      "short_name": "الأدوية",
+      "url": "./index.html#meds"
+    }
   ]
 }
