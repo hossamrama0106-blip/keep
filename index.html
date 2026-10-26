@@ -1,0 +1,1238 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14181f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<title>قطار اليوم</title>
+<style>
+:root{
+  --bg:#14181f;--card:#1d232d;--card2:#262d3a;--text:#e9edf3;--mute:#8d98aa;
+  --green:#3fbf7f;--yellow:#e6b94a;--red:#e5604d;--blue:#5b9cf0;--line:#2f384a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,"Segoe UI",Tahoma,sans-serif;line-height:1.5}
+body{padding:16px 16px 110px;max-width:640px;margin:0 auto}
+h1{font-size:20px;margin:0}
+h2{font-size:15px;margin:0 0 8px;color:var(--mute);font-weight:600}
+button{font:inherit;color:inherit;border:0;border-radius:14px;padding:14px 16px;background:var(--card2);cursor:pointer;min-height:48px}
+button:active{transform:scale(.98)}
+.card{background:var(--card);border-radius:18px;padding:16px;margin-bottom:14px}
+.row{display:flex;gap:8px;align-items:center}
+.row.wrap{flex-wrap:wrap}
+.grow{flex:1}
+.mute{color:var(--mute);font-size:13px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.dots{display:flex;gap:5px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--card2)}
+.dot.on{background:var(--green)}.dot.half{background:var(--yellow)}
+.bat{display:flex;gap:4px;margin:8px 0}
+.bat i{flex:1;height:14px;border-radius:5px;background:var(--card2)}
+.bat i.on{background:var(--green)}
+.now .title{font-size:24px;font-weight:700;margin:2px 0 4px}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.mode{padding:10px 6px;text-align:center;font-size:13px;border:2px solid transparent}
+.mode b{display:block;font-size:15px}
+.mode.sel.g{border-color:var(--green)}.mode.sel.y{border-color:var(--yellow)}.mode.sel.r{border-color:var(--red)}
+.primary{background:var(--green);color:#08140d;font-weight:700;font-size:18px;width:100%}
+.q{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.q:last-child{border:0}
+.q.done{opacity:.55}
+.q .ic{font-size:22px;width:30px;text-align:center}
+.fuel{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fuel button{text-align:right;border:2px solid transparent;font-size:14px}
+.fuel button.on{border-color:var(--green);background:var(--okbg)}
+#sosBtn{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--red);color:#fff;font-weight:700;border-radius:30px;padding:14px 22px;box-shadow:0 6px 20px #0008;z-index:5}
+.ov{position:fixed;inset:0;background:var(--bg);z-index:10;padding:20px;display:none;overflow:auto}
+.ov.show{display:block}
+.ov .inner{max-width:560px;margin:0 auto;text-align:center}
+.big{font-size:64px;font-weight:700;font-variant-numeric:tabular-nums;margin:18px 0}
+.msg{background:var(--card);border-radius:16px;padding:14px;margin:14px 0;text-align:right}
+.acts{text-align:right;margin:10px 0;padding:0;list-style:none}
+.acts li{background:var(--card);border-radius:12px;padding:12px;margin-bottom:8px}
+#night{background:#000;z-index:20}
+#night .inner{padding-top:12vh}
+.moods{display:flex;gap:8px;justify-content:center;margin:16px 0}
+.moods button{font-size:28px;padding:10px 12px;background:var(--card2)}
+textarea{width:100%;background:var(--card2);color:var(--text);border:0;border-radius:12px;padding:10px;font:inherit;min-height:60px}
+.flash{animation:fl .6s}
+@keyframes fl{0%{background:var(--green)}100%{background:var(--card)}}
+.small{padding:8px 12px;min-height:36px;font-size:13px}
+input,select{background:var(--card2);color:var(--text);border:0;border-radius:10px;padding:10px;font:inherit}
+.prog{height:8px;border-radius:5px;background:var(--card2);margin:6px 0;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--green);transition:width .3s}
+.opt{display:block;width:100%;text-align:right;margin-bottom:8px}
+.bub{padding:10px 12px;border-radius:14px;margin-bottom:8px;white-space:pre-wrap;max-width:92%}
+.bub.user{background:var(--card2);margin-right:auto;margin-left:0}
+.bub.assistant{background:var(--okbg)}
+.act{font-size:12px;color:var(--yellow);margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pre{white-space:pre-wrap}
+.ngrid{columns:2;column-gap:10px}
+.nc{break-inside:avoid;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;position:relative;cursor:pointer;overflow-wrap:anywhere}
+.nc .npin{position:absolute;left:8px;top:6px;font-size:12px}
+.nc .ni{padding:2px 0}.nc .ni.nd{text-decoration:line-through;opacity:.55}
+.nc .nb{margin-top:4px}
+.cdots{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.cdot{width:30px;height:30px;min-height:30px;padding:0;border-radius:50%;border:2px solid var(--line)}
+.cdot.sel{border-color:#fff}
+.tabon{border:2px solid var(--green)}
+:root{--okbg:#1f3a2e;--acc:#3fbf7f;--r:18px}
+.primary,.prog i,.hb{background:var(--acc)}
+.card{border-radius:var(--r)}
+button{transition:background .3s}
+body{transition:background .6s}
+.heat{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:8px 0}
+.heat i{aspect-ratio:1;border-radius:6px;background:var(--card2)}
+.heat i.on{background:var(--green)}.heat i.half{background:var(--yellow)}
+.hb{height:14px;border-radius:7px;background:var(--green);min-width:4px}
+input[type=range]{width:100%;padding:0}
+.chip{display:inline-block;background:var(--card2);border-radius:20px;padding:4px 10px;font-size:13px;margin:2px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1><span id="veh">🚂</span> قطار اليوم</h1><div class="mute" id="dateTxt"></div></div>
+  <div class="dots" id="week" title="آخر 7 أيام"></div>
+</header>
+
+<div id="app"></div>
+
+<button id="sosBtn">🆘 طوارئ: رغبة ملحّة / هبوط</button>
+
+<!-- Run overlay -->
+<div class="ov" id="run"><div class="inner" id="runIn"></div></div>
+<!-- SOS overlay -->
+<div class="ov" id="sos"><div class="inner" id="sosIn"></div></div>
+<!-- Night -->
+<div class="ov" id="night"><div class="inner" id="nightIn"></div></div>
+<!-- Panel -->
+<div class="ov" id="pg" style="z-index:9"><div class="inner" id="pgIn" style="text-align:right"></div></div>
+<!-- Ideas -->
+<div class="ov" id="ideas"><div class="inner" id="ideasIn"></div></div>
+<!-- Lock -->
+<div class="ov" id="lock" style="z-index:60"><div class="inner" id="lockIn"></div></div>
+
+<script>
+"use strict";
+/* ============ إعدادات الحصص (قابلة للتعديل هنا فقط) ============ */
+const NIGHT_START = "21:30", NIGHT_END = "06:15";
+const LOCK_DAYS = 5;          // الإنجليزية مقفلة في المستوى التمهيدي
+const CAFFEINE_CUTOFF = 14;   // لا كافيين بعد هذه الساعة
+const SWEEP_DAYS = [0,2,4];   // أيام الكنس/المسح (أحد، ثلاثاء، خميس)
+function isDoctorDay(dt){
+  const k=dkey(dt),o=S.doctorOn&&S.doctorOn[k];
+  if(o===true||o===false)return o;
+  if(dt.getDay()!==3||!S.doctorAnchor)return false;
+  const w=Math.round((new Date(k)-new Date(S.doctorAnchor))/(7*864e5));
+  return w%2===0;
+}
+function blocksFor(dt){
+  const sweep=SWEEP_DAYS.includes(dt.getDay());
+  return [
+  {id:"launch", ic:"🌅", name:"الإقلاع والوقود الأول", t:"6:00–7:00 ص", plain:true,
+    desc:"ماء + إفطار بروتين + الدواء الصباحي، ثم الذهاب للعمل. لا مهام ثقيلة الآن — الخمول الصباحي مع الدواء طبيعي."},
+  {id:"work", ic:"💻", name:"الدوام والبرمجة العملية", t:"7:00 ص–4:00 م", plain:true,
+    desc:"العمل الرسمي + تطبيق الأفكار البرمجية + وجبة الغداء. لا كافيين بعد الثانية ظهراً."},
+  isDoctorDay(dt)
+   ? {id:"clinic", ic:"🩺", name:"الصيانة الطبية والاستشفاء — العيادة والمشي الحر", t:"4:00–5:15 م", plain:true,
+      desc:"زيارة الطبيب ثم مشي حر. إتمامها إنجاز كامل ١٠٠٪ مثل أيام الجيم تماماً."}
+   : {id:"gym", ic:"🏋️", name:"التربية الرياضية (الجيم)", t:"4:00–5:15 م",
+      full:"التمرين مع المدرب", mid:"١٥ دقيقة تمرين خفيف", rescue:"٥ دقائق إطالة أو مشي في الغرفة"},
+  {id:"recharge", ic:"🚿", name:"الفسحة الكبرى: إعادة الشحن والطبخ", t:"5:15–6:15 م", meal:true,
+    full:"دُش دافئ + واي بروتين + كرياتين + وجبة ما بعد التمرين (بروتين + كربوهيدرات معقدة) + ماء وأملاح. جهّز عشاء وعلبة الغد دفعة واحدة. بدون كافيين أو مكملات منبهة.",
+    mid:"دُش + مكمل البروتين + وجبة بسيطة", rescue:"ماء + مكمل البروتين"},
+  {id:"english", ic:"📖", name:"حصة الإنجليزية", t:"6:15–6:40 م", rounds:{full:1,mid:1,rescue:1}, mins:{full:20,mid:10,rescue:2},
+    locked: dayNum()<=LOCK_DAYS,
+    full:"٢٠ دقيقة تفاعلية بعد الجيم والوجبة (نافذة الصفاء الذهني)", mid:"١٠ دقائق", rescue:"اقرأ جملتين فقط"},
+  {id:"home", ic:"🧹", name:"حصة صيانة البيئة", t:"6:40–7:00 م", rounds:{full:1,mid:1,rescue:1}, mins:{full:15,mid:10,rescue:3},
+    full: sweep?"١٥ دقيقة كنس/مسح بعدّاد، مع بودكاست أو مقطع صوتي ممتع. ثم جهّز ملابس الغد.":"١٥ دقيقة ترتيب الغرفة وتجهيز ملابس الغد، مع بودكاست ممتع.",
+    mid:"١٠ دقائق ترتيب سريع", rescue:"رتّب شيئاً واحداً وجهّز ملابس الغد"},
+  {id:"fun", ic:"🎮", name:"المتع المسموحة والأقارب", t:"7:00–9:00 م", fun:true,
+    full:"وقت حر بلا ذنب (روايات، فيديو، أقارب، ترفيه آمن)", mid:"١٥ دقيقة", rescue:"٣ دقائق استراحة"},
+  {id:"shutdown", ic:"🌙", name:"إغلاق النظام", t:"9:00–9:30 م", plain:true,
+    desc:"الدواء المسائي + إظلام الغرفة + الاستعداد للنوم. تُقفل الشاشة عند 9:30."}
+  ];
+}
+const B=()=>blocksFor(new Date());
+const REPORTS={
+  launch:"تم الإقلاع: سكر الدم مستقر والدواء الصباحي في موعده. الفص الجبهي جاهز لدوام اليوم.",
+  work:"اكتمل الدوام. الحصة التالية جسدية.",
+  gym:"اكتمل الحمل البدني. إفراز الدوبامين وBDNF مرتفع، ونافذة صفاء ذهني مدتها ساعتان مفتوحة.",
+  clinic:"اكتملت الصيانة الطبية: تم تحديث البروتوكول. النظام يسجل إنجازاً كاملاً.",
+  recharge:"تم استعادة التوازن الكيميائي وتفريغ الكورتيزول. الفص الجبهي مستقر الآن.",
+  english:"تم تثبيت جلسة لغة قصيرة داخل النافذة المثلى. لا حاجة لأكثر من ذلك اليوم.",
+  home:"المكان صُلّح والغد مجهّز. لا مهام معلّقة متبقية.",
+  fun:"فترة الترفيه سُجّلت بنجاح. الحصة الأخيرة هي الإغلاق.",
+  shutdown:"بدأ الإغلاق: الإضاءة منخفضة والكورتيزول يهبط. لا مهام معلقة."
+};
+const FUEL = ["وجبة بروتين وألياف ١","وجبة بروتين وألياف ٢","سناك مشبع (حمص/بيض)","المكملات والدواء في موعده"];
+const MODES = {
+  full:{label:"كاملة",cls:"g",rounds:3,min:15,pts:3,em:"🟢"},
+  mid:{label:"متوسطة",cls:"y",rounds:1,min:15,pts:2,em:"🟡"},
+  rescue:{label:"إنقاذ",cls:"r",rounds:1,min:3,pts:1,em:"🔴"}
+};
+const MEAL_MIN = {full:20,mid:10,rescue:3};
+const FUN_UNLOCK = 3;   // نقاط الشحن اللازمة لفتح المتعة
+const SOS_SECONDS = 600;
+const FREEZE_DAYS = 14;
+
+/* ============ التخزين ============ */
+const KEY="train.v1";
+let S;
+function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+  if(!S)S={start:today(),days:{},ideas:[],run:null,sos:null,sel:{}};
+  norm();}
+function norm(){S.days=S.days||{};S.ideas=S.ideas||[];S.sel=S.sel||{};S.profile=S.profile||{};S.dreams=S.dreams||[];S.weekly=S.weekly||{};S.over=S.over||{mins:{}};S.over.mins=S.over.mins||{};S.ai=S.ai||{};S.skin=S.skin||{mode:"auto"};S.notes=S.notes||[];S.meds=S.meds||[];S.ocd=S.ocd||[];S.wins=S.wins||[];S.docQs=S.docQs||"";S.vault=S.vault||{};S.vault.spent=S.vault.spent||[];S.rem=S.rem||{on:false,items:{}};S.rem.items=S.rem.items||{};}
+function save(){S.updatedAt=Date.now();S.lastOpen=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}pushSoon();cfgSoon()}
+function dkey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function dayNum(){return Math.floor((new Date(today())-new Date(S.start))/864e5)+1}
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function day(){const k=logicalDay();const d=S.days[k]||(S.days[k]={blocks:{},fuel:[0,0,0,0],mood:null,sos:0,sosWins:0});
+  d.checks=d.checks||[];d.meds=d.meds||{};d.water=d.water||0;return d}
+function logicalDay(){return today()}
+const $=id=>document.getElementById(id);
+function setHTML(el,key,html){if(el.dataset.k!==key){el.innerHTML=html;el.dataset.k=key;return true}return false}
+const mmss=s=>{s=Math.max(0,Math.ceil(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+const toMin=t=>{const[a,b]=t.split(":").map(Number);return a*60+b}
+function isNight(){const d=new Date(),m=d.getHours()*60+d.getMinutes();return m>=toMin(NIGHT_START)||m<toMin(NIGHT_END)}
+
+/* ============ صوت واهتزاز ============ */
+let actx;
+function beep(n=1){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  for(let i=0;i<n;i++){const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);
+    o.frequency.value=660+i*220;const t=actx.currentTime+i*.22;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.start(t);o.stop(t+.2)}}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate(n>1?[120,60,120]:120)}catch(e){}}
+
+/* ============ المنطق ============ */
+function points(){const d=day();let p=0;B().forEach(b=>{const r=d.blocks[b.id];if(r&&r.status==="done"&&!b.fun)p+=MODES[r.mode].pts});return p}
+const MAXP=12;
+function currentBlock(){const d=day();return B().find(b=>!d.blocks[b.id]&&!b.locked)}
+function finishBlock(id,mode,status="done"){day().blocks[id]={status,mode};if(status==="done")day().last=id;S.run=null;save();render()}
+function modeMinutes(b,m){const o=S.over&&S.over.mins&&S.over.mins[b.id];if(o&&o[m])return o[m];return b.mins?b.mins[m]:b.meal?MEAL_MIN[m]:MODES[m].min}
+function modeRounds(b,m){return b.rounds?b.rounds[m]:b.meal?1:MODES[m].rounds}
+
+/* ============ الواجهة الرئيسية ============ */
+function render(){
+  const d=day(),cur=currentBlock(),p=points();
+  $("dateTxt").textContent=new Date().toLocaleDateString("ar",{weekday:"long",day:"numeric",month:"long"});
+  // week dots
+  let w="";for(let i=6;i>=0;i--){const dt=new Date();dt.setDate(dt.getDate()-i);
+    const k=dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+    const x=S.days[k];const n=x?Object.values(x.blocks).filter(b=>b.status==="done").length:0;
+    w+=`<span class="dot ${n>=3?"on":n>=1?"half":""}"></span>`}
+  $("week").innerHTML=w;
+
+  const sinceStart=Math.floor((new Date(today())-new Date(S.start))/864e5)+1;
+  let h="";
+  h+=`<div class="card"><h2>🧭 حكمة اليوم · ${esc(wisdomToday().k)}</h2><div style="font-size:17px">${esc(wisdomToday().t)}</div></div>`;
+  h+=`<div class="card"><h2>📝 ملاحظة سريعة</h2><div class="row"><input id="qn" class="grow" placeholder="فكرة؟ مهمة؟ دوّنها وأخلِ رأسك..." value="${esc(QN)}"><button class="small" id="qnAdd">حفظ</button></div>
+    <div class="row" style="margin-top:8px"><button class="small grow" data-go="notes">📝 كل الملاحظات (${S.notes.filter(x=>!x.arch).length})</button></div></div>`;
+  if(S.welcome&&S.welcome.day===today())h+=`<div class="card" style="border:2px solid var(--acc)"><b>👋 أهلاً بعودتك</b>
+    <div class="msg" style="margin:8px 0">غبت ${S.welcome.gap} يوماً، ولا شيء ضاع: ملاحظاتك وإنجازاتك (${winsList().length} في خزانتك) محفوظة. السلسلة تبدأ من جديد بلا أي لوم، والعودة بحد ذاتها إنجاز. ابدأ بخطوة بحجم دقيقتين.</div>
+    <div class="row wrap"><button class="small grow" id="wbRescue">🔴 ابدأ بوضع الإنقاذ لعدة أيام</button><button class="small" id="wbX">إخفاء</button></div></div>`;
+  const si=streakInfo();
+  h+=`<div class="card"><div class="row wrap"><span class="chip">🔥 ${si.streak} يوم</span><span class="chip">❄️ ${si.credits} تجميد</span><button class="chip" data-go="vault" style="border:0;color:inherit;min-height:0">🪙 ${coinBal()}</button></div>
+    <div class="mute" style="margin-top:6px">السلسلة لا تعود إلى الصفر عند انقطاع يوم؛ رصيد التجميد يحميها.</div></div>`;
+  h+=floorCard(d);
+  if(d.checks.length<3&&new Date().getHours()>=7&&new Date().getHours()<22)h+=`<div class="card"><div class="row"><div class="grow"><b>📊 كيف حالك الآن؟</b><div class="mute">ثلاث لمسات تغذي بياناتك (${d.checks.length}/3 اليوم)</div></div><button class="small" data-go="check">سجّل</button></div></div>`;
+  if(S.ocd.some(x=>x.a==null&&Date.now()-x.at<864e5))h+=`<div class="card"><div class="row"><div class="grow"><b>🛡️ كم شدة الفكرة الآن؟</b><div class="mute">أغلق سجل الفكرة السابقة بلمسة</div></div><button class="small" data-go="ocd">أغلق</button></div></div>`;
+  if(S.meds.length)h+=`<div class="card"><h2>💊 أدويتي اليوم</h2>`+S.meds.map(m=>`<div class="q"><label class="grow"><input type="checkbox" data-med="${m.id}" ${d.meds[m.id]?"checked":""}> ${esc(m.name)} <span class="mute">${m.time}</span></label></div>`).join("")+`</div>`;
+  const nDone=Object.values(d.blocks).filter(b=>b.status==="done").length,nSkip=Object.values(d.blocks).filter(b=>b.status!=="done").length;
+  if(nSkip>0||(new Date().getHours()>=12&&nDone===0))h+=`<div class="card"><b>🔧 إعادة معايرة النظام</b><div class="mute">لا يوجد «يوم ضائع»: الحصة المؤجَّلة تُعامَل كبيانات لا كخطأ، والنظام يكمل من الحصة التالية. أي حصة بوضع الإنقاذ تُحتسب إنجازاً كاملاً وتشحن البطارية.</div></div>`;
+  if(dayNum()<=LOCK_DAYS)h+=`<div class="card"><b>المستوى التمهيدي: تثبيت المحرك</b><div class="mute">اليوم ${dayNum()} من ${LOCK_DAYS} — النوم والغذاء والجيم والترتيب فقط. 🔒 الإنجليزية تُفتح تلقائياً في اليوم ${LOCK_DAYS+1}.</div></div>`;
+  if(isDoctorDay(new Date()))h+=`<div class="card"><b>🩺 اليوم: جدول الصيانة الطبية والاستشفاء</b><div class="mute">حصة الجيم استُبدلت رسمياً بحصة العيادة والمشي الحر.</div></div>`;
+  if(new Date().getHours()>=CAFFEINE_CUTOFF)h+=`<div class="card"><b>☕ لا كافيين ولا منبهات الآن</b><div class="mute">يبقى الكافيين في الدم نحو 6 ساعات ويفسد النوم العميق. ماء وأملاح بدلاً منه.</div></div>`;
+  if(d.last&&REPORTS[d.last])h+=`<div class="card"><h2>📋 تقرير كفاءة النظام</h2><div>${REPORTS[d.last]}</div></div>`;
+  // battery
+  const segs=12;let bat="";for(let i=0;i<segs;i++)bat+=`<i class="${i<p?"on":""}"></i>`;
+  h+=`<div class="card"><h2>🔋 بطارية المتع المسموحة</h2><div class="bat">${bat}</div>
+      <div class="mute">${p>=FUN_UNLOCK?"المتعة مفتوحة ✅ — كل حصة تشحن أكثر":"أنجز أي حصة (ولو وضع الإنقاذ) لتفتح المتعة"}</div></div>`;
+  // current
+  if(cur){
+    const sel=S.sel[cur.id]||"full";
+    const locked=cur.fun&&p<FUN_UNLOCK;
+    const passB=`<button class="grow small" id="passBtn">↪ مرّر (بدون ذنب)</button>`;
+    h+=`<div class="card now"><div class="mute">الحصة الحالية${cur.t?" · "+cur.t:""}</div>
+      <div class="title">${cur.ic} ${cur.name}</div>`;
+    if(cur.plain){
+      h+=`<div class="msg" style="margin:10px 0">${cur.desc}</div>
+        <button class="primary" id="doneNow2">✅ تمت</button>
+        <div class="row" style="margin-top:8px">${passB}</div></div>`;
+    }else{
+      h+=`<div class="modes">${Object.keys(MODES).map(m=>`<button class="mode ${MODES[m].cls} ${sel===m?"sel":""}" data-mode="${m}">${MODES[m].em}<b>${MODES[m].label}</b></button>`).join("")}</div>
+      <div class="msg" style="margin:0 0 12px">${cur[sel]}</div>
+      ${locked?`<div class="mute" style="text-align:center">🔒 اشحن البطارية أولاً: أنجز أي حصة (ولو إنقاذ)</div>
+        <button class="primary" style="margin-top:8px;opacity:.4" disabled>ابدأ</button>
+        <div class="row" style="margin-top:8px">${passB}</div>`
+      :`<button class="primary" id="startBtn">▶ ابدأ (${modeRounds(cur,sel)>1?modeRounds(cur,sel)+" جولات × ":""}${modeMinutes(cur,sel)} د)</button>
+        <div class="row" style="margin-top:8px"><button class="grow small" id="doneNow">✅ أنهيتها بدون مؤقت</button>${passB}</div>`}
+    </div>`;
+    }
+  }else{
+    h+=`<div class="card now"><div class="title">🎉 انتهى قطار اليوم</div><div class="mute">أنجزت ما يكفي. ارتح، كُل جيداً، ونم في موعدك.</div></div>`;
+  }
+  // queue
+  h+=`<div class="card"><h2>طابور الحصص</h2>`+B().map(b=>{const r=d.blocks[b.id];
+    const st=r?(r.status==="done"?MODES[r.mode].em+" ✅":"↪"):b.locked?"🔒":(cur&&cur.id===b.id?"◀ الآن":"");
+    return `<div class="q ${r?"done":""}"><span class="ic">${b.ic}</span><span class="grow">${b.name}<div class="mute">${b.t||""}</div></span><span class="mute">${st}</span></div>`}).join("")+`</div>`;
+  // fuel
+  h+=`<div class="card"><h2>⛽ عدّاد الوقود (لمسة واحدة، بلا أرقام)</h2><div class="fuel">`+
+    FUEL.map((f,i)=>`<button data-fuel="${i}" class="${d.fuel[i]?"on":""}">${d.fuel[i]?"✅":"⬜"} ${f}</button>`).join("")+`</div>
+    <div class="row" style="margin-top:10px;gap:4px">${Array.from({length:8},(_,i)=>`<button class="small grow" data-w="${i+1}" style="padding:4px 2px;min-height:34px;${i<d.water?"background:var(--okbg)":""}">💧</button>`).join("")}</div>
+    <div class="mute" style="margin-top:4px">الماء: ${d.water}/8 أكواب</div></div>`;
+  const sy=S.sync||{};
+  h+=`<details class="card"><summary><b>⚙️ إعدادات</b></summary>
+    <p class="mute">أربعاء الطبيب (كل أسبوعين): اختر تاريخ أقرب أربعاء طبيب</p>
+    <input type="date" id="docAnchor" value="${S.doctorAnchor||""}">
+    <p><button class="small" id="docToday">${isDoctorDay(new Date())?"إلغاء":"اجعل"} اليوم يوم الطبيب</button></p>
+    <p class="mute">المزامنة بين الأجهزة (Supabase) — اختياري، انظر supabase.sql</p>
+    <input id="syUrl" placeholder="Project URL" value="${sy.url||""}" style="width:100%;margin-bottom:6px">
+    <input id="syKey" placeholder="anon key" value="${sy.key||""}" style="width:100%;margin-bottom:6px">
+    <input id="syId" placeholder="معرّف سري طويل (يشترك فيه جهازاك)" value="${sy.id||""}" style="width:100%;margin-bottom:6px">
+    <button class="small" id="sySave">حفظ وتشغيل المزامنة</button> <span class="mute" id="syState"></span>
+    <p class="mute">المدرب الذكي (Anthropic): المفتاح يُحفظ على هذا الجهاز فقط ولا يُزامَن. عند الاستخدام تُرسَل إجاباتك وبيانات اليوم إلى Anthropic.</p>
+    <input id="aiKey" type="password" placeholder="Anthropic API key" value="${esc((S.ai||{}).key||"")}" style="width:100%;margin-bottom:6px">
+    <input id="aiModel" placeholder="claude-opus-5-5" value="${esc((S.ai||{}).model||"")}" style="width:100%;margin-bottom:6px">
+    <button class="small" id="aiSave">حفظ</button> <span class="mute" id="aiState"></span>
+  </details>`;
+  const ready=S.dreams.filter(x=>x.state==="ready").length,inc=S.dreams.filter(x=>x.state==="incubating").length;
+  const tot=totalAnswered(),wk=[4,5].includes(new Date().getDay())&&new Date().getHours()>=16;
+  h+=`<div class="card"><h2>🧠 النظام الذكي</h2>
+    ${S.coachMsg&&S.coachMsg.day===today()?`<div class="msg" style="margin-top:0">🤖 ${esc(S.coachMsg.text)}</div>`:""}
+    ${S.profile["q1"]?"":`<div class="msg" style="margin-top:0">دقيقتان لتخصيص خطتك: الكبسولة الأولى (10 أسئلة بلمسة). الباقي اختياري ولاحقاً.<button class="primary" style="margin-top:8px" data-go="cap1">⛽ ابدأ الكبسولة 1</button></div>`}
+    <div class="grid2">
+     <button data-go="profile">📋 الملف (${tot}/50)</button>
+     <button data-go="dreams">💭 الأحلام ${ready?`<span class="chip">⏰ ${ready} جاهز</span>`:inc?`<span class="chip">🔒 ${inc}</span>`:""}</button>
+     <button data-go="coach">🤖 المدرب</button>
+     <button data-go="rem">🔔 التنبيهات ${S.rem.on?"✅":""}</button>
+     <button data-go="notes">📝 ملاحظات (${S.notes.filter(x=>!x.arch).length})</button>
+     <button data-go="weekly" style="${wk?"border:2px solid var(--yellow)":""}">🎉 تقرير الأسبوع</button>
+    </div></div>`;
+  h+=`<div class="card"><h2>🧰 أدواتي</h2><div class="grid2">
+     <button data-go="check">📊 حالتي وأنماطي</button><button data-go="meds">💊 الأدوية</button>
+     <button data-go="ocd">🛡️ الأفكار الملحّة</button><button data-go="vault">🪙 خزانة المكافآت</button>
+     <button data-go="month">📅 مراجعة الشهر</button><button data-go="wins">🏆 خزانة الإنجازات</button>
+     <button data-go="doc">🩺 ملخص الطبيب</button><button data-go="sec">🔐 الأمان والنسخ</button>
+     <button data-go="skin">🎨 المظهر (${curSkin().n})</button></div></div>`;
+  // freeze
+  h+=`<div class="card"><div class="row"><div class="grow"><b>يوم ${Math.min(sinceStart,FREEZE_DAYS)} من ${FREEZE_DAYS}</b>
+    <div class="mute">${sinceStart<=FREEZE_DAYS?"فترة التجميد: لا تعديل على النظام. جرّبه فقط.":"انتهت فترة التجربة — راجع صندوق الأفكار الآن."}</div></div>
+    <button class="small" id="ideasBtn">💡 صندوق الأفكار (${S.ideas.length})</button></div></div>`;
+  $("app").innerHTML=h;
+
+  $("app").querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{S.sel[cur.id]=b.dataset.mode;save();render()});
+  $("app").querySelectorAll("[data-fuel]").forEach(b=>b.onclick=()=>{const i=+b.dataset.fuel;d.fuel[i]=d.fuel[i]?0:1;save();render();if(d.fuel[i])beep(1)});
+  if($("startBtn"))$("startBtn").onclick=()=>startRun(cur,S.sel[cur.id]||"full");
+  if($("doneNow"))$("doneNow").onclick=()=>{beep(2);finishBlock(cur.id,S.sel[cur.id]||"full")};
+  if($("passBtn"))$("passBtn").onclick=()=>finishBlock(cur.id,"rescue","skipped");
+  if($("doneNow2"))$("doneNow2").onclick=()=>{beep(2);finishBlock(cur.id,"full")};
+  $("docAnchor").onchange=e=>{S.doctorAnchor=e.target.value||null;save();render()};
+  $("docToday").onclick=()=>{S.doctorOn=S.doctorOn||{};S.doctorOn[today()]=!isDoctorDay(new Date());save();render()};
+  $("sySave").onclick=()=>{S.sync={url:$("syUrl").value.trim().replace(/\/$/,""),key:$("syKey").value.trim(),id:$("syId").value.trim()};
+    try{Notification.requestPermission()}catch(e){}save();pullNow();$("syState").textContent="تم"};
+  $("aiSave").onclick=()=>{S.ai={key:$("aiKey").value.trim(),model:$("aiModel").value.trim()};save();$("aiState").textContent="تم"};
+  $("app").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{const g=b.dataset.go;
+    if(g==="cap1"){QS={cap:1,i:0};openPanel("q");return}
+    openPanel(g);if(g==="weekly")confetti()});
+  $("ideasBtn").onclick=openIdeas;
+  if($("wbX"))$("wbX").onclick=()=>{S.welcome=null;save();render()};
+  if($("wbRescue"))$("wbRescue").onclick=()=>{B().filter(b=>!b.plain&&!b.fun).forEach(b=>S.sel[b.id]="rescue");S.welcome=null;save();render()};
+  $("app").querySelectorAll("[data-floor]").forEach(b=>b.onclick=()=>{d.floor=b.dataset.floor||null;save();render()});
+  $("app").querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{const n=+b.dataset.w;d.water=d.water===n?n-1:n;save();render();beep(1)});
+  $("app").querySelectorAll("[data-med]").forEach(c=>c.onchange=()=>{d.meds[c.dataset.med]=c.checked?1:0;save();render()});
+  $("qn").oninput=e=>{QN=e.target.value};
+  const qnGo=()=>{if(addQuick(QN)){QN="";render()}};
+  $("qnAdd").onclick=qnGo;$("qn").onkeydown=e=>{if(e.key==="Enter")qnGo()};
+}
+
+/* ============ جلسة الحصة ============ */
+function startRun(b,mode){S.run={id:b.id,mode,round:1,endAt:0,between:false,pre:true};save();tick()}
+function renderRun(){
+  const r=S.run,ov=$("run");
+  if(!r){ov.classList.remove("show");$("runIn").dataset.k="";return}
+  const b=B().find(x=>x.id===r.id),n=modeRounds(b,r.mode);
+  ov.classList.add("show");
+  if(r.pre){
+    if(!setHTML($("runIn"),"pre"+r.id,`<div class="mute">${b.ic} ${b.name}</div><h1>مرساة البدء: ٣ خطوات صغيرة</h1>
+      <ul class="acts">${anchorsFor(b.id).map(a=>`<li>${a}</li>`).join("")}</ul>
+      <div class="msg">لا تفكر في الحصة كلها. نفّذ الأولى فقط ثم اضغط.</div>
+      <button class="primary" id="preGo">▶ جاهز، ابدأ العدّاد</button><p><button class="small" id="preX">إلغاء</button></p>`))return;
+    $("preGo").onclick=()=>{r.pre=false;r.endAt=Date.now()+modeMinutes(b,r.mode)*60000;save();tick()};
+    $("preX").onclick=()=>{S.run=null;save();render();renderRun()};
+    return}
+  if(r.between){
+    if(!setHTML($("runIn"),"b"+r.round,`<div class="big">✅</div><h1>انتهت الجولة ${r.round} من ${n}</h1>
+      <div class="msg">⚡ تم شحن البطارية. خذ نفساً وماءً ثم أكمل.</div>
+      <button class="primary" id="nextR">▶ الجولة ${r.round+1}</button>
+      <p><button id="endR" class="small">أنهي الحصة هنا ✅</button></p>`))return;
+    $("nextR").onclick=()=>{r.round++;r.between=false;r.endAt=Date.now()+modeMinutes(b,r.mode)*60000;save();tick()};
+    $("endR").onclick=()=>finishBlock(r.id,r.mode);
+    return;
+  }
+  const left=(r.endAt-Date.now())/1000;
+  const rk="t"+r.id+r.round;
+  if(!setHTML($("runIn"),rk,`<div class="mute">${b.ic} ${b.name} — ${MODES[r.mode].em} ${MODES[r.mode].label}${n>1?` — جولة ${r.round}/${n}`:""}</div>
+    <div class="big">${mmss(left)}</div>
+    <div class="msg">${b[r.mode]}</div>
+    <div class="row" style="margin:10px 0"><input id="runCap" class="grow" placeholder="⚡ فكرة طارئة؟ دوّنها وارجع"><button class="small" id="runCapB">حفظ</button></div>
+    <div class="row"><button class="grow" id="stopR">⏹ إيقاف (بلا ذنب)</button><button class="grow" id="doneR">✅ خلصت</button></div>`)){const bg=$("runIn").querySelector(".big");if(bg)bg.textContent=mmss(left);return}
+  const cap=()=>{const v=$("runCap").value.trim();if(v&&addQuick("⚡ "+v)){$("runCap").value="";$("runCap").placeholder="✅ حُفظت، عد لمهمتك"}};
+  $("runCapB").onclick=cap;$("runCap").onkeydown=e=>{if(e.key==="Enter")cap()};
+  $("stopR").onclick=()=>{S.run=null;save();render();renderRun()};
+  $("doneR").onclick=()=>{beep(2);finishBlock(r.id,r.mode);};
+}
+function runTick(){
+  const r=S.run;if(!r||r.between||r.pre)return;
+  if(Date.now()>=r.endAt){const b=B().find(x=>x.id===r.id),n=modeRounds(b,r.mode);
+    if(r.round>=n){beep(3);finishBlock(r.id,r.mode);}else{beep(2);r.between=true;save();}}
+}
+
+/* ============ طوارئ ============ */
+$("sosBtn").onclick=()=>{S.sos={endAt:Date.now()+SOS_SECONDS*1000};day().sos++;save();renderSos()};
+function renderSos(){
+  const ov=$("sos");
+  if(!S.sos){ov.classList.remove("show");$("sosIn").dataset.k="";return}
+  ov.classList.add("show");
+  const left=(S.sos.endAt-Date.now())/1000;
+  const sk=left>0?"w":"d";
+  if(left>0){
+    if(!setHTML($("sosIn"),sk,`<h1>🌊 اركب الموجة — الرغبة تبلغ ذروتها وتنكسر</h1>
+      <div class="big">${mmss(left)}</div>
+      <ul class="acts"><li>🚶 غيّر مكانك الآن (اترك الغرفة/الجهاز)</li><li>💧 اشرب كوب ماء كبيراً</li><li>🧊 اغسل وجهك بماء بارد (يهدّئ الجهاز العصبي)</li></ul>
+      <div class="msg">ما تشعر به ليس فشلاً ولا ضعف إرادة، بل انخفاض مؤقت في الدوبامين بسبب الإجهاد. انتظر ١٠ دقائق فقط قبل أي قرار.</div>
+      <button id="sosX" class="small">إغلاق</button><p class="mute" style="margin-top:24px">إذا راودتك أفكار إيذاء النفس، تواصل فوراً مع طبيبك أو خط الطوارئ في بلدك.</p>`)){const bg=$("sosIn").querySelector(".big");if(bg)bg.textContent=mmss(left);return}
+  }else{
+    setHTML($("sosIn"),sk,`<div class="big">🌤️</div><h1>مرّت الموجة</h1>
+      <div class="msg">أنت أقوى من لحظة الرغبة. اختر شيئاً صغيراً الآن: ماء، حصة إنقاذ، أو مشي.</div>
+      <button class="primary" id="sosWin">💪 عبرتها</button>
+      <button id="sosX" class="small" style="margin-top:10px">إغلاق</button><p class="mute" style="margin-top:24px">إذا راودتك أفكار إيذاء النفس، تواصل فوراً مع طبيبك أو خط الطوارئ في بلدك.</p>`);
+    $("sosWin").onclick=()=>{day().sosWins++;S.sos=null;save();beep(3);renderSos();render()};
+  }
+  $("sosX").onclick=()=>{S.sos=null;save();renderSos()};
+}
+
+/* ============ صندوق الأفكار ============ */
+function openIdeas(){$("ideas").classList.add("show");drawIdeas()}
+function drawIdeas(){
+  $("ideasIn").innerHTML=`<h1>💡 صندوق الأفكار</h1>
+   <p class="mute">فكرة جديدة للتطبيق؟ اكتبها هنا فقط — لا برمجة قبل انتهاء الـ ${FREEZE_DAYS} يوماً.</p>
+   <textarea id="ideaT" placeholder="الفكرة..."></textarea>
+   <p><button class="primary" id="ideaAdd">أضِف وارجع للقطار</button></p>
+   <ul class="acts">${S.ideas.map((x,i)=>`<li>${x.replace(/</g,"&lt;")} <button class="small" data-del="${i}">✕</button></li>`).join("")}</ul>
+   <button id="ideaClose">رجوع</button>`;
+  $("ideaAdd").onclick=()=>{const v=$("ideaT").value.trim();if(v){S.ideas.push(v);save()}$("ideas").classList.remove("show");render()};
+  $("ideaClose").onclick=()=>{$("ideas").classList.remove("show")};
+  $("ideasIn").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{S.ideas.splice(+b.dataset.del,1);save();drawIdeas()});
+}
+
+/* ============ الإغلاق الليلي ============ */
+function renderNight(){
+  const ov=$("night");
+  if(!isNight()){ov.classList.remove("show");return}
+  ov.classList.add("show");
+  if(S.sos){$("night").style.zIndex=9;return}else{$("night").style.zIndex=20}
+  const d=day(),el=$("nightIn");
+  const key=el.dataset.k;
+  const k=d.mood===null&&new Date().getHours()>=12?"mood":"sleep";
+  if(key===k)return; el.dataset.k=k;
+  if(k==="mood"){
+    el.innerHTML=`<h2>تقييم اليوم — ١٠ ثوانٍ فقط، مرة واحدة</h2>
+     <div class="moods">${["😞","😕","😐","🙂","😄"].map((e,i)=>`<button data-m="${i+1}">${e}</button>`).join("")}</div>`;
+    el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{d.mood=+b.dataset.m;save();el.dataset.k="";renderNight()});
+  }else{
+    el.innerHTML=`<div style="font-size:40px;opacity:.5">🌙</div><p style="color:#555">وقت الإغلاق حتى ${NIGHT_END}.<br>لا فحص مشاعر ولا حسابات. أنجزت ما يكفي.</p>
+     <button id="nSos" style="background:#1a0b0b;color:#a55;margin-top:40px">🆘 رغبة ملحّة؟</button>`;
+    $("nSos").onclick=()=>$("sosBtn").click();
+  }
+}
+
+/* ============ النظام الذكي: الملف، الحاضنة، المدرب، التقرير ============ */
+const DEFAULT_MODEL="claude-opus-5-5";
+const DREAM_MS=72*3600*1000;
+const esc=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const YN=["نعم","أحياناً","لا"];
+const CAPS=[
+{id:1,ic:"⛽",name:"البصمة الجسدية والوقود",qs:[
+ {q:"وزنك الآن (كجم)؟",t:"n"},{q:"طولك (سم)؟",t:"n"},{q:"عمرك؟",t:"n"},
+ {q:"متى يهاجمك الجوع الشره غالباً؟",o:["الصباح","الظهر","العصر","الليل","عند الإحباط فقط"]},
+ {q:"أكلاتك الصحية المفضلة؟",t:"x"},
+ {q:"ما الأكل الذي يصعب عليك مقاومته؟",t:"x"},
+ {q:"جودة نومك آخر أسبوع؟",o:["سيئة","ضعيفة","متوسطة","جيدة","ممتازة"]},
+ {q:"كم ساعة تنام فعلياً؟",o:["أقل من 5","5–6","6–7","7–8","أكثر من 8"]},
+ {q:"أدويتك ومكملاتك الحالية (للسياق فقط)؟",t:"x"},
+ {q:"أي آثار جانبية تلاحظها؟",o:["نعاس صباحي","جفاف فم","زيادة جوع","أرق","لا شيء تقريباً"]}]},
+{id:2,ic:"⚡",name:"محفزات الدوبامين والانطفاء",qs:[
+ {q:"ما الذي يشعل حماسك أكثر؟",t:"x"},
+ {q:"متى يكون تركيزك الأفضل؟",o:["الصباح الباكر","الضحى","بعد الظهر","المساء"]},
+ {q:"ما الذي يسبب لك التجمد (Freeze)؟",o:["عقبة تقنية","خسارة مالية","نتيجة أقل من التوقع","مهمة ثقيلة غامضة","لا أعرف"]},
+ {q:"كم يدوم التجمد عادةً؟",o:["دقائق","ساعة","نصف يوم","يوم أو أكثر"]},
+ {q:"متى تهاجمك الرغبات القهرية؟",o:["الملل","بعد الإحباط","آخر الليل","عند الوحدة","بعد التوتر"]},
+ {q:"ما أول إشارة تنذرك قبل الانهيار؟",t:"x"},
+ {q:"ما أسرع شيء يخرجك من الانطفاء؟",t:"x"},
+ {q:"أيهما أنسب لك؟",o:["مهام قصيرة متتابعة","مهمة طويلة واحدة","يعتمد على المزاج"]},
+ {q:"هل ينفعك مؤقت مرئي أمامك؟",o:YN},
+ {q:"ما أكثر مشتت في هاتفك؟",t:"x"}]},
+{id:3,ic:"🏫",name:"بصمة الطفولة والمدرسة",qs:[
+ {q:"ما الذي جعلك متفوقاً في الطفولة؟",t:"x"},
+ {q:"كيف كانت بيئة المذاكرة؟",o:["هادئة ومنظمة","فوضوية","مع أهلي","وحدي"]},
+ {q:"أي تشجيع كان يحركك؟",o:["المدح","المنافسة","الجوائز","التحدي","الاهتمام"]},
+ {q:"أي مادة/نشاط أحببته أكثر؟",t:"x"},
+ {q:"علاقتك بالمعلمين؟",o:["ممتازة","جيدة","متوترة","لا أتذكر"]},
+ {q:"متى بدأ أول تراجع؟",o:["الابتدائي","الإعدادي","بداية الثانوية","وسط الثانوية"]},
+ {q:"ماذا ظننتَ سبب الانهيار وقتها؟ (اختياري)",t:"x"},
+ {q:"موقف أهلك وقتها؟",o:["ضغط","تجاهل","قلق ودعم","لم يفهموا"]},
+ {q:"ذكرى مدرسية تجعلك تبتسم؟",t:"x"},
+ {q:"هل ينفعك جدول خارجي جاهز كالمدرسة؟",o:YN}]},
+{id:4,ic:"🛡️",name:"أنماط الوسواس والصدمة (اختياري)",qs:[
+ {q:"أكثر فكرة متكررة تزعجك؟ (اختياري)",t:"x"},
+ {q:"هل تكرر التحقق أو طقوساً معينة؟",o:YN},
+ {q:"متى يشتد التوتر في اليوم؟",o:["الصباح","العمل","المساء","قبل النوم"]},
+ {q:"ما المواقف التي تُثقل ذكرياتك؟ (اختياري)",t:"x"},
+ {q:"ما الذي يمنحك أماناً وهدوءاً؟",t:"x"},
+ {q:"هل تتجنب أماكن أو أشخاصاً؟",o:YN},
+ {q:"كيف تهدّئ نفسك الآن؟",o:["الأكل","الشاشات","المشي","التنفس","النوم","لا شيء"]},
+ {q:"هل تفحص مشاعرك أكثر من مرة في الساعة؟",o:YN},
+ {q:"هل تتابع جلسات علاج سلوكي؟",o:["نعم منتظم","أحياناً","لا"]},
+ {q:"ما الذي لا تريد أن يقوله لك التطبيق؟",t:"x"}]},
+{id:5,ic:"🌠",name:"الأحلام والمهارات",qs:[
+ {q:"مستوى إنجليزيتك؟",o:["مبتدئ","متوسط","جيد","متقدم"]},
+ {q:"مستوى برمجتك؟",o:["مبتدئ","متوسط","جيد","محترف"]},
+ {q:"أي مشروع يراودك الآن؟",t:"x"},
+ {q:"حلم الرواية أو الإخراج: ما هو؟",t:"x"},
+ {q:"كم ساعة حرة واقعية يومياً؟",o:["أقل من ساعة","1–2","2–3","أكثر"]},
+ {q:"علاقتك بعائلتك الآن؟",o:["قريبة","مقبولة","متوترة","بعيدة"]},
+ {q:"من الشخص الأكثر دعماً لك؟",t:"x"},
+ {q:"ما أكبر مكسب تريده بعد 3 أشهر؟",t:"x"},
+ {q:"ما أكثر ما تخاف حدوثه؟",t:"x"},
+ {q:"كيف تحب أن يخاطبك المدرب؟",o:["تحليلي مباشر","هادئ داعم","مرح وقصير"]}]}
+];
+const REWARDS=["عصير ليمون بالنعناع بارد في مكان مفتوح 🍋","مشاهدة فيلمك المفضل مع سناك صحي 🎬","شراء أداة صغيرة تحبها 🛠️","مشوار على الكورنيش أو حديقة مع بودكاست ممتع 🌳","وجبة عشاء مختارة بعناية مع شخص تحبه 🍽️"];
+let PG=null,QS=null,HIST=[],BUSY=false;
+function aiOn(){return !!(S.ai&&S.ai.key)}
+function answered(c){let n=0;for(let i=1;i<=10;i++)if(S.profile["q"+((c-1)*10+i)])n++;return n}
+function totalAnswered(){return Object.keys(S.profile).length}
+
+/* ---- لوحات ---- */
+function head(t){return `<div class="row"><h1 class="grow">${t}</h1><button class="small" id="pgClose">✕</button></div>`}
+function openPanel(n){PG=n;$("pg").classList.add("show");drawPanel()}
+function closePanel(){PG=null;QS=null;$("pg").classList.remove("show");render()}
+function drawPanel(){const f={dreams:pDreams,coach:pCoach,profile:pProfile,weekly:pWeekly,q:pQ,rem:pRem,skin:pSkin,notes:pNotes,ned:pNoteEd,check:pCheck,meds:pMeds,ocd:pOcd,vault:pVault,month:pMonth,wins:pWins,doc:pDoc,sec:pSec}[PG];if(!f)return;f();const c=$("pgClose");if(c)c.onclick=closePanel;$("pg").scrollTop=0}
+function setPg(h){$("pgIn").innerHTML=h}
+
+/* ---- الملف (50 سؤالاً على 5 كبسولات) ---- */
+function pProfile(){
+  let h=head("📋 الملف العصبي (الدستور)")+`<p class="mute">${totalAnswered()} من 50. كل كبسولة 10 أسئلة بلمسة، وكلها اختيارية ويمكنك التخطي أو التوقف في أي وقت. يقرأ المدرب هذا الملف قبل أي تعديل.</p>`;
+  h+=CAPS.map(c=>{const a=answered(c.id);return `<div class="card"><div class="row"><div class="grow"><b>${c.ic} ${c.name}</b><div class="prog"><i style="width:${a*10}%"></i></div><div class="mute">${a}/10</div></div><button class="small" data-cap="${c.id}">${a>=10?"مراجعة":a?"أكمل":"ابدأ"}</button></div></div>`}).join("");
+  if(answered(1)>=10&&aiOn())h+=`<p><button class="primary" id="persBtn">🤖 اطلب من المدرب تخصيص خطتي الآن</button></p>`;
+  h+=`<p><button class="small" id="wipe">حذف الملف بالكامل</button></p>`;
+  setPg(h);
+  $("pgIn").querySelectorAll("[data-cap]").forEach(b=>b.onclick=()=>{const c=+b.dataset.cap;let i=0;while(i<10&&S.profile["q"+((c-1)*10+i+1)])i++;QS={cap:c,i:i>=10?0:i};PG="q";drawPanel()});
+  $("wipe").onclick=()=>{if(confirm("حذف كل إجاباتك؟")){S.profile={};save();drawPanel()}};
+  if($("persBtn"))$("persBtn").onclick=()=>{PG="coach";sendCoach("اقرأ ملفي الشخصي وخصّص خطتي: عدّل مدد الحصص أو أوضاعها حيث يلزم ونفّذ ذلك بالأدوات، ثم لخّص ما غيّرته.")};
+}
+function pQ(){
+  const c=CAPS[QS.cap-1];
+  if(QS.i>=10){beep(3);
+    if(QS.cap===1&&!S.cap1Done){S.cap1Done=true;S.coachMsg={text:"تم حفظ بصمتك الجسدية والوقود. جدولك المبدئي يعمل الآن؛ أكمل بقية الكبسولات متى شئت (كلها اختيارية).",day:today()};save();confetti();closePanel();return}
+    PG="profile";drawPanel();return}
+  const n=(QS.cap-1)*10+QS.i+1,q=c.qs[QS.i],prev=S.profile["q"+n];
+  let h=head(c.ic+" "+c.name)+`<div class="prog"><i style="width:${QS.i*10}%"></i></div><div class="mute">سؤال ${QS.i+1} من 10</div><div class="card"><div style="font-size:19px;margin:6px 0 12px">${q.q}</div>`;
+  if(q.o)h+=q.o.map((o,k)=>`<button class="opt" data-o="${k}">${o}</button>`).join("");
+  else h+=`<input id="qa" type="${q.t==="n"?"number":"text"}" value="${prev?esc(prev.a):""}" style="width:100%"><button class="primary" id="qok" style="margin-top:8px">التالي</button>`;
+  h+=`</div><div class="row"><button class="small grow" id="qskip">تخطَّ</button><button class="small grow" id="qexit">حفظ والخروج</button></div>`;
+  setPg(h);
+  const ans=a=>{S.profile["q"+n]={q:q.q,a};save();QS.i++;drawPanel()};
+  $("pgIn").querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>ans(q.o[+b.dataset.o]));
+  if($("qok"))$("qok").onclick=()=>{const v=$("qa").value.trim();if(v)ans(v);else{QS.i++;drawPanel()}};
+  $("qskip").onclick=()=>{QS.i++;drawPanel()};
+  $("qexit").onclick=()=>{PG="profile";QS=null;drawPanel()};
+}
+
+/* ---- حاضنة الأحلام ---- */
+const VERD={realistic:"🟢 واقعي",huge:"🟠 ضخم",escape:"🔴 هروب من مهام اليوم",unrated:"⚪ لم يُقيَّم آلياً"};
+function dreamCard(d){
+  let b="";
+  if(d.state==="incubating"){const hrs=Math.max(1,Math.ceil((d.at+DREAM_MS-Date.now())/3600000));
+    b=`<div class="mute">🔒 تُفتح بعد ${hrs} ساعة. الفص الجبهي الآن في حالة اندفاع دوبامين — سنناقشها بعد 72 ساعة للتأكد أنها رغبة حقيقية وليست هروباً من مهام اليوم.</div>`}
+  else if(d.state==="ready")b=`<div>⏰ مرّت 72 ساعة. هل ما زلت تريد هذا الهدف بنفس الحماس بعد أن هدأ الدوبامين؟</div><div class="row" style="margin-top:8px"><button class="grow" data-yes="${d.id}">نعم، ما زلت أريده</button><button class="grow" data-no="${d.id}">لا، كانت نزوة</button></div>`;
+  else if(d.state==="analyzing")b=`<div class="mute">⏳ جارٍ التحليل…</div>`;
+  else if(d.state==="dropped")b=`<div class="mute">🗑️ كانت نزوة — تُركت دون ذنب. هذا قرار ناجح.</div>`;
+  else b=`<div><b>${VERD[d.verdict]||d.verdict}</b></div><div class="pre" style="margin:6px 0">${esc(d.reason)}</div>`+(d.steps||[]).map(x=>`<div class="msg">⚛️ ${esc(x.text)}<div class="mute">${x.minutes} دقيقة فقط · ${esc(x.when||"")}</div></div>`).join("")+`<div class="mute">ممنوع العمل عليه أكثر من الذرة المسموحة اليوم.</div>`;
+  return `<div class="card"><div class="mute">💭</div><b>${esc(d.text)}</b>${b}</div>`;
+}
+function pDreams(){
+  let h=head("💭 حاضنة الأحلام")+`<p class="mute">اكتب أي رغبة أو شيء تريد تعلمه. تُقفل 72 ساعة حتى يهدأ الاندفاع، ثم نفحصها: واقعية أم ضخمة؟ ونفككها لذرات صغيرة.</p>
+   <textarea id="dT" placeholder="أريد... / أريد تعلم..."></textarea><p><button class="primary" id="dAdd">🔒 أودِع في الكبسولة</button></p>`;
+  h+=S.dreams.slice().reverse().map(dreamCard).join("");
+  setPg(h);
+  $("dAdd").onclick=()=>{const v=$("dT").value.trim();if(!v)return;S.dreams.push({id:Date.now(),text:v,at:Date.now(),state:"incubating"});save();beep(1);drawPanel()};
+  $("pgIn").querySelectorAll("[data-yes]").forEach(b=>b.onclick=()=>analyzeDream(S.dreams.find(x=>x.id==b.dataset.yes)));
+  $("pgIn").querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>{const d=S.dreams.find(x=>x.id==b.dataset.no);d.state="dropped";save();drawPanel()});
+}
+function checkDreams(){let ch=false;S.dreams.forEach(d=>{if(d.state==="incubating"&&Date.now()-d.at>=DREAM_MS){d.state="ready";ch=true}});
+  if(ch){save();beep(3);try{new Notification("انتهت 72 ساعة لأحد أحلامك",{body:"افتح الحاضنة"})}catch(e){}render();if(PG==="dreams")drawPanel()}}
+async function analyzeDream(d){
+  d.state="analyzing";save();drawPanel();
+  if(aiOn()){try{await agent(`حلم المستخدم بعد 72 ساعة وما زال يريده: "${d.text}" (dream_id=${d.id}). حلّله: هل هو واقعي مع جدوله (دوام 7ص–4م + جيم) أم ضخم أم هروب من مهام اليوم؟ ثم فكّكه بعقلية الكل أو لا شيء إلى حتى 3 ذرات ميكروية، كل ذرة ≤10 دقائق في يوم محدد. نفّذ ذلك باستدعاء resolve_dream.`,false)}catch(e){d.err=e.message}}
+  if(d.state!=="active"){d.state="active";d.verdict="unrated";
+    d.reason=aiOn()?"تعذّر التحليل الآلي ("+(d.err||"")+"). قيّمه بنفسك: هل يتسع له جدولك؟":"لم يُفعَّل المدرب الذكي. قيّمه بنفسك: هل يتسع له جدولك؟ ابدأ بذرة صغيرة.";
+    d.steps=[{text:"اكتب أول خطوة صغيرة لهذا الحلم",minutes:10,when:"الخميس بعد حصة الإنجليزية"}]}
+  save();if(PG==="dreams")drawPanel();render();
+}
+
+/* ---- التقرير الأسبوعي ---- */
+function wkKey(){return Math.floor((Math.floor(Date.now()/864e5)+3)/7)}
+function weeklyStats(){
+  const st={days:0,moves:0,gym:0,clinic:0,full:0,mid:0,rescue:0,skipped:0,shutdown:0,fuelDays:0,sos:0,sosWins:0,perBlock:{}};
+  for(let i=0;i<7;i++){const dt=new Date();dt.setDate(dt.getDate()-i);const x=S.days[dkey(dt)];if(!x)continue;st.days++;
+    for(const[id,r]of Object.entries(x.blocks)){if(r.status==="done"){st[r.mode]++;st.perBlock[id]=(st.perBlock[id]||0)+1;if(id==="gym")st.gym++;if(id==="clinic")st.clinic++;if(id==="shutdown")st.shutdown++}
+      else{st.skipped++;st.perBlock["skipped_"+id]=(st.perBlock["skipped_"+id]||0)+1}}
+    if((x.fuel||[]).filter(Boolean).length>=3)st.fuelDays++;st.moves+=x.moves||0;st.sos+=x.sos||0;st.sosWins+=x.sosWins||0}
+  return st}
+function localNarrative(st){const L=[];
+  if(st.gym+st.clinic>0)L.push(`🏋️ ${st.gym+st.clinic} حصة حركة هذا الأسبوع: النشاط المنتظم يرفع BDNF (يدعم التركيز والتعافي) ويحسّن حساسية الإنسولين تدريجياً مع الاستمرار.`);
+  if(st.shutdown>0)L.push(`🌙 ${st.shutdown} ليالٍ بإغلاق منظّم: النوم المنتظم يخفض الكورتيزول ويساعد الدماغ على تثبيت الذاكرة وتنظيم المشاعر، وهو داعم لاستقرار الأعراض مع علاجك.`);
+  if(st.fuelDays>0)L.push(`⛽ ${st.fuelDays} أيام وقود شبه مكتمل: الانتظام في البروتين والوجبات يقلل نوبات الجوع الشره المرتبطة بهبوط السكر.`);
+  if(st.moves>0)L.push(`🚶 ${st.moves} استراحة حركة أثناء العمل: المشي القصير بعد الجلوس الطويل ينشّط الدورة الدموية ويخفف خمول الجسد.`);
+  if(st.sosWins>0)L.push(`🌊 عبرتَ ${st.sosWins} موجة رغبة بنجاح. كل موجة تمر تُضعف مسار الاندفاع في الدماغ.`);
+  if(st.rescue>0)L.push(`🔴 استخدمت وضع الإنقاذ ${st.rescue} مرة. هذا ليس فشلاً: ما يبني العادة هو الاستمرار لا الكمية.`);
+  if(!L.length)L.push("لا بيانات كافية هذا الأسبوع بعد. حصة إنقاذ واحدة كل يوم تكفي لبدء السلسلة.");
+  L.push("(ملاحظة: هذه آليات عامة وليست قياسات طبية لجسدك.)");return L}
+function pWeekly(){
+  const st=weeklyStats(),W=S.weekly[wkKey()]||{},reward=W.reward||REWARDS[wkKey()%REWARDS.length];
+  const lines=W.narrative?[W.narrative]:localNarrative(st);
+  let h=head("🎉 تقرير الأسبوع")+`<div class="card"><div class="grid2">
+    <div>✅ حصص منجزة: <b>${st.full+st.mid+st.rescue}</b></div><div>🟢 كاملة: <b>${st.full}</b></div>
+    <div>🟡 متوسطة: <b>${st.mid}</b></div><div>🔴 إنقاذ: <b>${st.rescue}</b></div>
+    <div>🏋️ حركة: <b>${st.gym+st.clinic}</b></div><div>🌙 إغلاق: <b>${st.shutdown}</b></div></div></div>
+   <div class="card"><h2>🧬 ماذا حدث داخل جسدك ومخك هذا الأسبوع؟</h2>${lines.map(x=>`<p class="pre">${esc(x)}</p>`).join("")}</div>
+   <div class="card"><h2>🎁 مكافأتك الحسية</h2><div style="font-size:18px">${esc(reward)}</div></div>`;
+  if(aiOn())h+=`<p><button class="primary" id="wkAi">🤖 تقرير المدرب + تعديل خطة الأسبوع القادم</button></p>`;
+  setPg(h);
+  if($("wkAi"))$("wkAi").onclick=async()=>{$("wkAi").textContent="⏳ …";$("wkAi").disabled=true;
+    try{await agent(`هذه نتائج أسبوعي: ${JSON.stringify(st)}. اكتب تقرير احتفال بلغة تحليلية مختصرة: حوّل التزامي لحقائق فسيولوجية عامة ومتحفظة تعتمد فقط على هذه الأرقام (لا تخترع أرقاماً)، ثم اقترح مكافأة حسية صغيرة تناسب الدايت واحفظ ذلك بـ save_weekly_report. بعدها عدّل مدد الحصص للأسبوع القادم بـ set_block_minutes حيث تظهر حصة تفشل باستمرار (skipped) أو وضع الإنقاذ يغلب، دون زيادة أي شيء.`,false)}catch(e){alert("تعذّر: "+e.message)}
+    drawPanel();confetti()};
+}
+function confetti(){
+  const c=document.createElement("canvas");c.style.cssText="position:fixed;inset:0;z-index:40;pointer-events:none";c.width=innerWidth;c.height=innerHeight;document.body.appendChild(c);
+  const x=c.getContext("2d"),cols=["#3fbf7f","#e6b94a","#5b9cf0","#e5604d","#fff"],P=[];
+  for(let i=0;i<140;i++)P.push({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*4,s:4+Math.random()*6,c:cols[i%5],r:Math.random()*6});
+  const t0=Date.now();(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.2;x.fillStyle=p.c;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});
+    if(Date.now()-t0<3500)requestAnimationFrame(f);else c.remove()})();
+}
+
+/* ---- حكمة اليوم (عبارات أصلية بلغة تحليلية هادئة، بلا لوم) ---- */
+const WISDOM=[
+{k:"رواقية",t:"الجزء الذي تتحكم به اليوم صغير: الخطوة التالية فقط. ما عداه بيانات."},
+{k:"رواقية",t:"العقبة ليست خارج الطريق، هي جزء من مساره. النظام يعيد حساب المسار ولا يلغيه."},
+{k:"رواقية",t:"لا تقيس يومك بما لم يحدث، بل بما أمكن فعله ضمن الموارد المتاحة اليوم."},
+{k:"رواقية",t:"الرغبة التي لا تُنفَّذ فوراً لا تموت؛ تفقد حدّتها فقط. الانتظار عملية معالجة."},
+{k:"رواقية",t:"الحكم على الحدث يضيف طبقة ثانية من الألم فوق الحدث نفسه. أزل الطبقة الثانية."},
+{k:"رواقية",t:"ما مضى من اليوم مغلق ومؤرشف. الصلاحية الوحيدة المتاحة الآن: اللحظة القادمة."},
+{k:"رواقية",t:"الانضباط ليس غياب التعثر، هو سرعة العودة بعده."},
+{k:"DBT",t:"الموجة الشعورية تبلغ ذروتها وتنكسر، عادةً خلال دقائق. مهمتك مراقبتها لا هزيمتها."},
+{k:"DBT",t:"القبول الجذري: «هذا هو الوضع الآن» جملة وصفية، لا استسلام. بعدها فقط يبدأ التعديل."},
+{k:"DBT",t:"المشاعر معلومات عن الموقف وليست أوامر تنفيذ. يمكنك قراءتها دون الامتثال لها."},
+{k:"DBT",t:"عندما ترتفع الحدّة: غيّر المكان، بارد على الوجه، تنفّس ببطء. تعديل الجسد يسبق تعديل الفكرة."},
+{k:"DBT",t:"فكرتان صحيحتان معاً: «أبذل ما أستطيع» و«أحتاج أن أتعدّل». لا تناقض بينهما."},
+{k:"DBT",t:"السلوك الفعّال لا ينتظر المزاج المناسب؛ يكفي أن يكون الفعل أصغر من المزاج."},
+{k:"رحمة بالنفس",t:"التعثر معطى متوقَّع في أي نظام معقّد، وليس حكماً على المستخدم."},
+{k:"رحمة بالنفس",t:"عامِل نفسك كما يعامل مهندس جيد نظاماً معطّلاً: يفحص السبب، ولا يشتمه."},
+{k:"رحمة بالنفس",t:"حصة بوضع الإنقاذ هي حصة منجزة. السلسلة تُبنى بالاستمرار لا بالكمية."},
+{k:"رحمة بالنفس",t:"التعب إشارة تشغيلية صحيحة. الاستجابة المناسبة لها تقليل الحمل لا إنكارها."},
+{k:"رحمة بالنفس",t:"لا يوجد «يوم ضائع». يوجد يوم بسعة أقل، وهو يوم صالح للتسجيل."},
+{k:"رحمة بالنفس",t:"التقدم ليس خطاً مستقيماً. المتوسط الأسبوعي هو الذي يحكي القصة، لا اليوم الواحد."},
+{k:"حمل معرفي",t:"الذاكرة العاملة محدودة. اكتب الخطوة التالية خارج رأسك، ثم نفّذها."},
+{k:"حمل معرفي",t:"المهمة الكبيرة تُرى كجبل لأنها غير مفكّكة. فكّكها إلى خطوة تتسع لعشر دقائق."},
+{k:"حمل معرفي",t:"تعدد المهام هو تبديل سريع بينها مع كلفة في كل تبديل. مهمة واحدة مفتوحة تكفي."},
+{k:"حمل معرفي",t:"قلّل قرارات الصباح: وجبة جاهزة وملابس مجهّزة تحفظان طاقة القرار لما يهم."},
+{k:"اقتصاد عصبي",t:"البدء أثقل من الاستمرار. اجعل بدايتك بحجم دقيقتين، وسيتولى الزخم الباقي."},
+{k:"اقتصاد عصبي",t:"كل احتكاك صغير أمام المهمة يرفع كلفة بدئها. أزل الاحتكاك قبل أن تطلب الدافع."},
+{k:"اقتصاد عصبي",t:"المكافأة الفورية الصغيرة تثبّت السلوك أكثر من وعدٍ كبير مؤجَّل."},
+{k:"اقتصاد عصبي",t:"الدوبامين يتبع التوقّع لا الإنجاز. لذلك تُنجز الخطوات الصغيرة وتُسجَّل فوراً."},
+{k:"اقتصاد عصبي",t:"فكرة الليل الضخمة تُحفظ في الحاضنة. الصباح يقرر هل هي مشروع أم اندفاع."},
+{k:"تشغيل",t:"النوم هو الصيانة الليلية للنظام. إغلاقه في موعده أفضل استثمار غير مرئي."},
+{k:"تشغيل",t:"الماء والبروتين في موعدهما يقللان ضوضاء الجسد، فيصير القرار أوضح."},
+{k:"تشغيل",t:"اختر حصة واحدة اليوم تكون «مضمونة». الباقي مكافأة إضافية على الأساس."},
+{k:"تشغيل",t:"النظام صُمّم ليتحمل أسوأ أيامك، لا ليطلب منك أفضلها."}
+];
+function wisdomToday(){return WISDOM[Math.floor(Date.now()/864e5-new Date().getTimezoneOffset()/1440)%WISDOM.length]}
+
+/* ---- التنبيهات والتذكيرات ---- */
+const REM_DEF=[
+ {id:"wisdom",time:"06:00",label:"🧭 حكمة اليوم"},
+ {id:"launch",time:"06:30",label:"💊 الإقلاع: الماء والإفطار والدواء الصباحي",blocks:["launch"]},
+ {id:"chk1",time:"10:30",label:"📊 تسجيل الحالة (صباحاً)",chk:0},
+ {id:"water",time:"11:00",label:"💧 ماء وأملاح"},
+ {id:"chk2",time:"14:30",label:"📊 تسجيل الحالة (بعد الظهر)",chk:1},
+ {id:"chk3",time:"19:30",label:"📊 تسجيل الحالة (مساءً)",chk:2},
+ {id:"caff",time:"13:45",label:"☕ إغلاق نافذة الكافيين"},
+ {id:"gym",time:"15:50",label:"🏋️ الحصة الجسدية (جيم/عيادة)",blocks:["gym","clinic"]},
+ {id:"recharge",time:"17:15",label:"🚿 إعادة الشحن والوجبة",blocks:["recharge"]},
+ {id:"english",time:"18:15",label:"📖 حصة الإنجليزية",blocks:["english"]},
+ {id:"home",time:"18:40",label:"🧹 صيانة البيئة",blocks:["home"]},
+ {id:"shutdown",time:"21:00",label:"🌙 إغلاق النظام والدواء المسائي",blocks:["shutdown"]},
+ {id:"weekly",time:"18:00",days:[4,5],label:"🎉 تقرير الأسبوع (خميس/جمعة)"}
+];
+function remText(id){if(id.startsWith("mv"))return["🚶 استراحة حركة",moveBody(id)];
+ if(id.startsWith("med")){const m=S.meds.find(x=>String(x.id)===id.slice(3,-1)),n=m?m.name:"";
+  return id.endsWith("a")?["💊 موعد "+n,`تنبيه النظام: موعد ${n}. سجّله بلمسة بعد التناول.`]:["💊 لم يُسجَّل "+n+" بعد","إن أخذته فسجّله. وإن نسيته فاسأل طبيبك أو الصيدلي عن التصرف، ولا تضاعف الجرعة."]}
+ const w=wisdomToday();const CHK=["📊 كيف حالك الآن؟","ثلاث لمسات: الطاقة والتركيز والتوتر. بيانات لخدمتك لا للحكم عليك."];return{
+ chk1:CHK,chk2:CHK,chk3:CHK,
+ wisdom:["🧭 حكمة اليوم — "+w.k,w.t],
+ launch:["🚂 تنبيه النظام: الإقلاع","ماء + إفطار بروتين + الدواء الصباحي. خطوة واحدة فقط الآن."],
+ water:["💧 ماء وأملاح","كوب ماء الآن. مهمة بحجم ثلاثين ثانية."],
+ caff:["☕ نافذة الكافيين تُغلق","هذا آخر موعد للكافيين اليوم. بعده ماء وأملاح بدلاً منه."],
+ gym:["🏋️ بعد قليل: الحصة الجسدية","كاملة أو إنقاذ، كلاهما يُحتسب. نقطة البدء: ارتدِ الحذاء فقط."],
+ recharge:["🚿 إعادة الشحن","دُش ثم بروتين. أول خطوة: كوب ماء."],
+ english:["📖 حصة الإنجليزية","عشرون دقيقة، أو جملتان في وضع الإنقاذ. اختر الأسهل وابدأ."],
+ home:["🧹 صيانة البيئة","مؤقت ١٥ دقيقة مع بودكاست، أو شيء واحد فقط بوضع الإنقاذ."],
+ shutdown:["🌙 إغلاق النظام","الدواء المسائي وإظلام الغرفة. لا مهام معلّقة؛ حصيلة اليوم كافية."],
+ weekly:["🎉 تقرير الأسبوع جاهز","التقرير الحيوي والمكافأة الحسية بانتظارك."]}[id]}
+/* استراحة الحركة: فتحات تُولَّد من الإعدادات خلال ساعات العمل */
+function moveSlots(){const m=S.rem.move||{};if(m.on===0)return[];
+  const st=toMin(m.from||"08:00"),en=toMin(m.to||"15:30"),ev=Math.max(20,+m.every||60),o=[];
+  for(let t=st;t<=en;t+=ev){const k=String(Math.floor(t/60)).padStart(2,"0")+String(t%60).padStart(2,"0");o.push({id:"mv"+k,time:k.slice(0,2)+":"+k.slice(2),move:true})}return o}
+function moveBody(id){const n=S.rem.name||"سام",i=Math.max(0,moveSlots().findIndex(x=>x.id===id));return[
+ `${n}، أعلم أنك في العمل، لكن انهض الآن من فضلك وامشِ دقيقة لتحريك الدورة الدموية.`,
+ `${n}، تنبيه النظام: مرّ وقت طويل على الجلوس. دقيقة مشي وتمطٍّ للكتفين، ثم تعود لمهمتك.`,
+ `${n}، استراحة ميكرو: قف، تمطَّ، انظر إلى شيء بعيد عشرين ثانية، واشرب رشفة ماء.`,
+ `${n}، دقيقة واحدة فقط: امشِ إلى أبعد نقطة قريبة وعُد. المهمة ستنتظرك.`][i%4]}
+function remList(){return REM_DEF.map(r=>Object.assign({},r,S.rem.items[r.id]||{})).concat(moveSlots(),medSlots())}
+function showMoveBar(txt){
+  let b=$("mvBar");if(b)b.remove();b=document.createElement("div");b.id="mvBar";
+  b.style.cssText="position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;max-width:620px;margin:auto;background:var(--card2);border:2px solid var(--green);border-radius:16px;padding:14px;z-index:30;box-shadow:0 6px 20px #0008";
+  b.innerHTML=`<div>🚶 ${esc(txt)}</div><div class="row" style="margin-top:10px"><button class="grow" id="mvGo">▶ دقيقة مشي</button><button class="small" id="mvX">لاحقاً</button></div>`;
+  document.body.appendChild(b);beep(1);
+  const auto=setTimeout(()=>b.remove(),600000);
+  b.querySelector("#mvX").onclick=()=>{clearTimeout(auto);b.remove()};
+  b.querySelector("#mvGo").onclick=()=>{clearTimeout(auto);let s=60;
+    b.innerHTML=`<div class="big" id="mvT" style="margin:0;font-size:40px;text-align:center">01:00</div><div class="mute" style="text-align:center">امشِ وحرّك كتفيك…</div>`;
+    const iv=setInterval(()=>{s--;const t=b.querySelector("#mvT");if(t)t.textContent=mmss(s);
+      if(!document.body.contains(b)){clearInterval(iv);return}
+      if(s<=0){clearInterval(iv);beep(3);day().moves=(day().moves||0)+1;save();
+        b.innerHTML=`<div style="text-align:center">✅ سُجّلت استراحة الحركة. عد لمهمتك.</div>`;setTimeout(()=>b.remove(),3000)}},1000)}}
+function checkMove(){
+  if(S.run||S.sos||isNight())return;
+  const nm=new Date().getHours()*60+new Date().getMinutes(),f=remFired();let ch=false;
+  moveSlots().forEach(s=>{const t=toMin(s.time);if(nm<t||nm>=t+10||f.ids[s.id])return;
+    f.ids[s.id]=1;ch=true;const txt=moveBody(s.id);
+    if(document.hidden){if(S.rem.on&&notifOK())showNote("🚶 استراحة حركة",txt,today()+s.id)}else showMoveBar(txt)});
+  if(ch)try{localStorage.setItem("train.fired",JSON.stringify(f))}catch(e){}}
+function remFired(){try{const f=JSON.parse(localStorage.getItem("train.fired"));if(f&&f.date===today())return f}catch(e){}return{date:today(),ids:{}}}
+async function showNote(title,body,tag){
+  const o={body,tag,icon:"icon.svg",badge:"icon.svg",lang:"ar",dir:"rtl",vibrate:[120,60,120]};
+  try{const reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.showNotification(title,o);return true}}catch(e){}
+  try{new Notification(title,o);return true}catch(e){return false}}
+function notifOK(){return "Notification" in window&&Notification.permission==="granted"}
+function checkReminders(){
+  if(!S.rem.on||!notifOK())return;
+  const now=new Date(),nm=now.getHours()*60+now.getMinutes(),f=remFired(),d=day();let ch=false;
+  remList().forEach(r=>{
+    if(r.move||r.med||r.on===0||r.on===false)return;
+    if(r.days&&!r.days.includes(now.getDay()))return;
+    const t=toMin(r.time);if(nm<t||nm>=t+20||f.ids[r.id])return;
+    f.ids[r.id]=1;ch=true;
+    if(r.blocks&&r.blocks.some(b=>d.blocks[b]))return;           // الحصة منجزة/محسومة: لا إزعاج
+    if(r.chk!==undefined&&d.checks.length>r.chk)return;          // سجّلت حالتك بالفعل
+    const[tt,bb]=remText(r.id);showNote(tt,bb,today()+r.id);
+  });
+  if(ch)try{localStorage.setItem("train.fired",JSON.stringify(f))}catch(e){}
+}
+let cfgT=null;
+function cfgSoon(){if(!S||!S.rem||!S.rem.on)return;clearTimeout(cfgT);cfgT=setTimeout(pushCfg,600)}
+async function pushCfg(){
+  try{const reg=await navigator.serviceWorker.ready;if(!reg.active)return;const d=day();
+    reg.active.postMessage({type:"cfg",cfg:{on:S.rem.on,date:today(),done:Object.keys(d.blocks),medsDone:Object.keys(d.meds).filter(k=>d.meds[k]),
+      items:remList().filter(r=>r.on!==0&&r.on!==false).map(r=>{const[title,body]=remText(r.id);return{id:r.id,time:r.time,days:r.days,blocks:r.blocks,med:r.med,title,body}})}});
+  }catch(e){}}
+async function regPeriodic(){try{const reg=await navigator.serviceWorker.ready;if(reg.periodicSync)await reg.periodicSync.register("train-remind",{minInterval:15*60*1000})}catch(e){}}
+let INST=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();INST=e;if(PG==="rem")drawPanel()});
+window.addEventListener("appinstalled",()=>{INST=null;if(PG==="rem")drawPanel()});
+function pRem(){
+  const sup="Notification" in window,perm=sup?Notification.permission:"unsupported";
+  const stand=matchMedia("(display-mode: standalone)").matches||navigator.standalone,ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const on=S.rem.on&&perm==="granted";
+  let h=head("🔔 التنبيهات والتذكيرات");
+  h+=`<div class="card"><b>${on?"✅ التنبيهات مفعّلة على هذا الجهاز":perm==="denied"?"⛔ الإشعارات محظورة من إعدادات المتصفح":"التنبيهات غير مفعّلة"}</b>
+   <div class="mute" style="margin:6px 0">${!sup?"هذا المتصفح لا يدعم الإشعارات.":ios&&!stand?"على iPhone: افتح قائمة المشاركة ← «إضافة إلى الشاشة الرئيسية»، ثم افتح التطبيق من أيقونته وفعّل التنبيهات.":"التفعيل يخص هذا الجهاز فقط؛ فعّله على الهاتف والحاسوب كلٌّ على حدة."}</div>
+   <div class="row wrap">${on?`<button class="small" id="remOff">إيقاف</button><button class="small" id="remTest">🔔 جرّب تنبيهاً</button>`:sup&&perm!=="denied"?`<button class="primary" id="remOn">🔔 فعّل التنبيهات</button>`:""}
+   ${INST?`<button class="small" id="instBtn">📲 ثبّت كتطبيق</button>`:stand?`<span class="chip">📲 مثبّت كتطبيق</span>`:""}</div></div>`;
+  const mv=S.rem.move||{};
+  h+=`<div class="card"><h2>🚶 استراحة الحركة أثناء العمل</h2>
+   <label><input type="checkbox" id="mvOn" ${mv.on===0?"":"checked"}> تذكير بالمشي دقيقة (لتحريك الدورة الدموية)</label>
+   <div class="row wrap" style="margin:8px 0">كل <select id="mvEvery">${[30,45,60,90,120].map(v=>`<option value="${v}" ${(+mv.every||60)===v?"selected":""}>${v} د</option>`).join("")}</select>
+    من <input type="time" id="mvFrom" value="${mv.from||"08:00"}"> إلى <input type="time" id="mvTo" value="${mv.to||"15:30"}"></div>
+   <div class="row">الاسم في الرسالة <input id="mvName" class="grow" value="${esc(S.rem.name||"سام")}"></div>
+   <div class="mute" style="margin-top:6px">يظهر شريط داخل التطبيق إن كان مفتوحاً، وإشعار إن كان في الخلفية (بعد تفعيل التنبيهات).</div></div>`;
+  h+=`<div class="card"><h2>مواعيد التذكير (عدّل الوقت أو أوقف ما لا تريده)</h2>`+remList().filter(r=>!r.move&&!r.med).map(r=>`<div class="q"><label class="grow"><input type="checkbox" data-rid="${r.id}" ${r.on===0||r.on===false?"":"checked"}> ${r.label}</label><input type="time" data-rt="${r.id}" value="${r.time}"></div>`).join("")+`</div>`;
+  h+=`<div class="card"><h2>ما الذي يمكن توقّعه فعلاً؟</h2><div class="mute pre">• والتطبيق مفتوح أو في الخلفية: التذكيرات تصل في موعدها.
+• التطبيق المثبّت (Chrome/Edge على الأندرويد والحاسوب): يحاول المتصفح الفحص الدوري وهو مغلق، لكنه هو من يحدد التوقيت وقد يتأخر.
+• التنبيه المضمون وهو مغلق تماماً يتطلب خادم Web Push (يمكن بناؤه لاحقاً عبر Supabase Edge Functions).
+• لا يصلك تذكير بحصة أنجزتها أو أجّلتها، لتجنب الإزعاج.</div></div>`;
+  setPg(h);
+  const g=id=>$("pgIn").querySelector("#"+id);
+  if(g("remOn"))g("remOn").onclick=async()=>{const p=await Notification.requestPermission();S.rem.on=p==="granted";save();regPeriodic();pushCfg();
+    if(S.rem.on)showNote("🚂 تم تفعيل التنبيهات","هكذا ستصلك التذكيرات: قصيرة وهادئة وبلا لوم.","test");drawPanel()};
+  if(g("remOff"))g("remOff").onclick=()=>{S.rem.on=false;save();drawPanel()};
+  if(g("remTest"))g("remTest").onclick=()=>showNote(...remText("wisdom"),"test");
+  if(g("instBtn"))g("instBtn").onclick=async()=>{INST.prompt();try{await INST.userChoice}catch(e){}INST=null;drawPanel()};
+  const mvSet=()=>{S.rem.move={on:g("mvOn").checked?1:0,every:+g("mvEvery").value,from:g("mvFrom").value||"08:00",to:g("mvTo").value||"15:30"};save()};
+  ["mvOn","mvEvery","mvFrom","mvTo"].forEach(i=>g(i).onchange=mvSet);
+  g("mvName").onchange=e=>{S.rem.name=e.target.value.trim()||"سام";save()};
+  $("pgIn").querySelectorAll("[data-rid]").forEach(c=>c.onchange=()=>{const o=S.rem.items[c.dataset.rid]=S.rem.items[c.dataset.rid]||{};o.on=c.checked?1:0;save()});
+  $("pgIn").querySelectorAll("[data-rt]").forEach(c=>c.onchange=()=>{if(!c.value)return;const o=S.rem.items[c.dataset.rt]=S.rem.items[c.dataset.rt]||{};o.time=c.value;
+    const f=remFired();delete f.ids[c.dataset.rt];try{localStorage.setItem("train.fired",JSON.stringify(f))}catch(e){}save()});
+}
+
+/* ---- الملاحظات (على طريقة Google Keep) ---- */
+const NCOL=["","#5c2b29","#614a19","#635d19","#345920","#16504b","#2d555e","#42275e","#5b2245"];
+let NV={q:"",tab:"n"},ND=null,QN="";
+const nid=()=>Date.now()+Math.floor(Math.random()*1000);
+const newDraft=list=>({id:null,title:"",body:"",list:!!list,items:list?[{t:"",d:0}]:[],color:0,pin:0,arch:0});
+function noteText(n){return n.list?n.items.map(i=>i.t).join(" "):n.body}
+function noteEmpty(n){return !n.title.trim()&&!noteText(n).trim()}
+function addQuick(t){t=(t||"").trim();if(!t)return false;
+  S.notes.unshift({id:nid(),title:"",body:t,list:false,items:[],color:0,pin:0,arch:0,at:Date.now(),upd:Date.now()});save();beep(1);return true}
+function noteCard(n){
+  let c=`<div class="nc" data-nid="${n.id}" style="${n.color?"background:"+NCOL[n.color]+";color:#f1f1f1":""}">`+(n.pin?`<span class="npin">📌</span>`:"")+(n.title?`<b>${esc(n.title)}</b>`:"");
+  if(n.list){const its=n.items.map((i,k)=>({i,k})).filter(x=>x.i.t.trim());
+    c+=its.slice(0,8).map(x=>`<div class="ni ${x.i.d?"nd":""}" data-ck="${n.id}:${x.k}">${x.i.d?"☑":"☐"} ${esc(x.i.t)}</div>`).join("")+(its.length>8?`<div class="mute">+${its.length-8} عناصر</div>`:"")}
+  else c+=`<div class="pre nb">${esc(n.body.length>300?n.body.slice(0,300)+"…":n.body)}</div>`;
+  const CATL={task:"✅ مهمة",idea:"💡 فكرة",worry:"🌧️ قلق"};
+  return c+(n.cat?`<div><span class="chip">${CATL[n.cat]||""}</span></div>`:"")+(n.step?`<div class="msg" style="margin:6px 0 0;padding:8px">⚛️ ${esc(n.step.text)} <span class="mute">(${n.step.minutes} د)</span></div>`:"")+"</div>"}
+function drawNotesGrid(){
+  const q=NV.q.trim().toLowerCase(),arch=NV.tab==="a";
+  const list=S.notes.filter(n=>!!n.arch===arch&&(!q||(n.title+" "+noteText(n)).toLowerCase().includes(q))).sort((a,b)=>(b.upd||0)-(a.upd||0));
+  const pin=list.filter(n=>n.pin),rest=list.filter(n=>!n.pin);let h="";
+  if(pin.length)h+=`<div class="mute">📌 مثبّتة</div><div class="ngrid">${pin.map(noteCard).join("")}</div>`+(rest.length?`<div class="mute">أخرى</div>`:"");
+  if(rest.length)h+=`<div class="ngrid">${rest.map(noteCard).join("")}</div>`;
+  if(!list.length)h=`<div class="mute" style="text-align:center;padding:30px">${arch?"لا ملاحظات مؤرشفة":q?"لا نتائج":"لا ملاحظات بعد. دوّن أول فكرة وأخلِ رأسك."}</div>`;
+  const g=$("nGrid");g.innerHTML=h;
+  g.querySelectorAll("[data-nid]").forEach(el=>el.onclick=()=>{const n=S.notes.find(x=>x.id==el.dataset.nid);if(!n)return;ND=JSON.parse(JSON.stringify(n));PG="ned";drawPanel()});
+  g.querySelectorAll("[data-ck]").forEach(el=>el.onclick=e=>{e.stopPropagation();const[id,k]=el.dataset.ck.split(":"),n=S.notes.find(x=>x.id==id);
+    if(n&&n.items[+k]){n.items[+k].d=n.items[+k].d?0:1;n.upd=Date.now();save();drawNotesGrid()}});
+}
+function pNotes(){
+  const arch=NV.tab==="a";
+  let h=head("📝 ملاحظات")+`<div class="row" style="margin-bottom:10px"><button class="small grow ${arch?"":"tabon"}" data-nt="n">الملاحظات</button><button class="small grow ${arch?"tabon":""}" data-nt="a">🗄 الأرشيف</button></div>
+   <input id="nS" placeholder="🔍 بحث في الملاحظات" value="${esc(NV.q)}" style="width:100%;margin-bottom:10px">`;
+  if(!arch)h+=`<div class="card"><input id="nQ" placeholder="دوّن ملاحظة..." style="width:100%"><div class="row wrap" style="margin-top:8px">
+    <button class="small" id="nAdd">＋ حفظ</button><button class="small" id="nList">☑ قائمة</button><button class="small" id="nFull">✍️ بتفصيل ولون</button></div></div>`;
+  h+=`<div id="nGrid"></div>`;setPg(h);
+  $("pgIn").querySelectorAll("[data-nt]").forEach(b=>b.onclick=()=>{NV.tab=b.dataset.nt;drawPanel()});
+  $("nS").oninput=e=>{NV.q=e.target.value;drawNotesGrid()};
+  if(!arch){const add=()=>{if(addQuick($("nQ").value)){$("nQ").value="";drawNotesGrid()}};
+    $("nAdd").onclick=add;$("nQ").onkeydown=e=>{if(e.key==="Enter")add()};
+    $("nList").onclick=()=>{ND=newDraft(true);PG="ned";drawPanel()};
+    $("nFull").onclick=()=>{ND=newDraft(false);ND.body=$("nQ").value;PG="ned";drawPanel()}}
+  drawNotesGrid();
+}
+function commitNote(){
+  if(ND.list)ND.items=ND.items.filter(i=>i.t.trim());
+  const ex=ND.id?S.notes.findIndex(x=>x.id===ND.id):-1;
+  let sid=null;
+  if(noteEmpty(ND)){if(ex>=0)S.notes.splice(ex,1)}
+  else if(ex>=0){sid=ND.id;S.notes[ex]=Object.assign({},S.notes[ex],ND,{upd:Date.now()})}
+  else{sid=nid();S.notes.unshift(Object.assign({},ND,{id:sid,at:Date.now(),upd:Date.now()}))}
+  save();ND=null;PG="notes";drawPanel();return sid}
+function pNoteEd(){
+  if(!ND){PG="notes";return pNotes()}
+  let h=`<div class="row"><h1 class="grow">${ND.id?"تعديل":"ملاحظة جديدة"}</h1><button class="small" id="eDone">✓ تم</button></div>
+   <div class="card" style="${ND.color?"background:"+NCOL[ND.color]+";color:#f1f1f1":""}"><input id="eT" placeholder="العنوان (اختياري)" value="${esc(ND.title)}" style="width:100%;font-weight:700;margin-bottom:8px">`;
+  if(ND.list)h+=ND.items.map((it,k)=>`<div class="row" style="margin-bottom:6px"><input type="checkbox" data-ed="${k}" ${it.d?"checked":""}><input class="grow" data-it="${k}" value="${esc(it.t)}" placeholder="عنصر"><button class="small" data-rm="${k}">✕</button></div>`).join("")+`<button class="small" id="eAddI">＋ عنصر</button>`;
+  else h+=`<textarea id="eB" placeholder="اكتب ملاحظتك..." style="min-height:160px">${esc(ND.body)}</textarea>`;
+  h+=`<div class="cdots">${NCOL.map((c,i)=>`<button class="cdot ${ND.color===i?"sel":""}" data-col="${i}" style="background:${c||"var(--card2)"}"></button>`).join("")}</div>
+   <div class="row wrap"><button class="small" id="ePin">${ND.pin?"📌 مثبّتة":"📍 تثبيت"}</button><button class="small" id="eConv">${ND.list?"📄 إلى نص":"☑ إلى قائمة"}</button>
+   <button class="small" id="eArch">${ND.arch?"📤 إخراج من الأرشيف":"🗄 أرشفة"}</button>${ND.id?`<button class="small" id="eDel">🗑 حذف</button>`:""}${aiOn()?`<button class="small" id="eAI">🤖 صنّف وفكّك</button>`:""}</div></div>`;
+  setPg(h);const g=id=>$("pgIn").querySelector("#"+id);
+  g("eT").oninput=e=>{ND.title=e.target.value};
+  if(g("eB"))g("eB").oninput=e=>{ND.body=e.target.value};
+  $("pgIn").querySelectorAll("[data-it]").forEach(el=>{el.oninput=()=>{ND.items[+el.dataset.it].t=el.value};
+    el.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();ND.items.splice(+el.dataset.it+1,0,{t:"",d:0});drawPanel();const a=$("pgIn").querySelectorAll("[data-it]");a[+el.dataset.it+1].focus()}}});
+  $("pgIn").querySelectorAll("[data-ed]").forEach(el=>el.onchange=()=>{ND.items[+el.dataset.ed].d=el.checked?1:0});
+  $("pgIn").querySelectorAll("[data-rm]").forEach(el=>el.onclick=()=>{ND.items.splice(+el.dataset.rm,1);if(!ND.items.length)ND.items.push({t:"",d:0});drawPanel()});
+  if(g("eAddI"))g("eAddI").onclick=()=>{ND.items.push({t:"",d:0});drawPanel();const a=$("pgIn").querySelectorAll("[data-it]");a[a.length-1].focus()};
+  $("pgIn").querySelectorAll("[data-col]").forEach(el=>el.onclick=()=>{ND.color=+el.dataset.col;drawPanel()});
+  g("ePin").onclick=()=>{ND.pin=ND.pin?0:1;drawPanel()};
+  g("eConv").onclick=()=>{if(ND.list){ND.body=ND.items.map(i=>i.t).filter(Boolean).join("\n");ND.items=[];ND.list=false}
+    else{ND.items=ND.body.split("\n").map(t=>t.trim()).filter(Boolean).map(t=>({t,d:0}));ND.items.push({t:"",d:0});ND.list=true;ND.body=""}drawPanel()};
+  g("eArch").onclick=()=>{ND.arch=ND.arch?0:1;commitNote()};
+  if(g("eDel"))g("eDel").onclick=()=>{if(confirm("حذف الملاحظة نهائياً؟")){S.notes=S.notes.filter(x=>x.id!==ND.id);save();ND=null;PG="notes";drawPanel()}};
+  g("eDone").onclick=commitNote;
+  if(g("eAI"))g("eAI").onclick=async()=>{const sid=commitNote();if(!sid)return;const n=S.notes.find(x=>x.id===sid);
+    try{await agent(`صنّف هذه الملاحظة (note_id=${sid}): "${(n.title+" "+noteText(n)).slice(0,600)}". حدّد: مهمة أو فكرة أو قلق. للمهمة اكتب ذرة ≤10 دقائق. للفكرة الكبيرة أنشئ حلماً في الحاضنة (make_dream=true). للقلق اقترح ذرة تهدئة صغيرة. نفّذ باستدعاء classify_note.`,false)}catch(e){alert("تعذّر: "+e.message)}
+    if(PG==="notes")drawPanel()};
+}
+
+/* ======== أدوات إضافية ======== */
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
+const f1=x=>String(Math.round(x*10)/10);
+const dayDone=x=>x?Object.values(x.blocks||{}).filter(b=>b.status==="done").length:0;
+const lastDays=n=>{const o=[];for(let i=0;i<n;i++){const dt=new Date();dt.setDate(dt.getDate()-i);o.push({k:dkey(dt),x:S.days[dkey(dt)]})}return o};
+
+/* سلسلة بلا عقاب: الانقطاع يستهلك رصيد التجميد (3) بدل تصفير السلسلة */
+function streakInfo(){let streak=0,credits=3;const st=new Date(S.start);
+  for(let i=0;i<400;i++){const dt=new Date();dt.setDate(dt.getDate()-i);if(i>0&&dt<st)break;
+    if(dayDone(S.days[dkey(dt)])>0)streak++;else if(i===0)continue;else if(credits>0)credits--;else break}
+  return{streak,credits}}
+
+/* الحد الأدنى المضمون */
+const FLOOR_IDS=["gym","clinic","recharge","english","home"];
+function floorCard(d){
+  const bl=B().filter(b=>FLOOR_IDS.includes(b.id)&&!b.locked&&!d.blocks[b.id]);
+  if(!d.floor)return `<div class="card"><h2>🛟 الحد الأدنى المضمون اليوم</h2><div class="mute" style="margin-bottom:8px">اختر حصة واحدة تكفي لاعتبار اليوم ناجحاً، ولو بوضع الإنقاذ.</div><div class="row wrap">${bl.map(b=>`<button class="small" data-floor="${b.id}">${b.ic} ${b.name}</button>`).join("")||`<span class="mute">لا حصص متاحة الآن</span>`}</div></div>`;
+  const b=B().find(x=>x.id===d.floor),r=d.blocks[d.floor];
+  if(r&&r.status==="done")return `<div class="card" style="border:2px solid var(--green)"><b>✅ تحقق الحد الأدنى المضمون</b><div class="mute">اليوم ناجح رسمياً. كل ما بعده إضافة.</div></div>`;
+  return `<div class="card"><b>🛟 المضمونة اليوم: ${b?b.ic+" "+b.name:""}</b><div class="mute">أي وضع يكفي، حتى الإنقاذ.</div><button class="small" data-floor="" style="margin-top:6px">تغيير</button></div>`}
+
+/* العملات وخزانة المكافآت */
+const PLAIN_IDS=["launch","work","clinic","shutdown"];
+function coinsEarned(){let c=0;Object.values(S.days).forEach(x=>{Object.entries(x.blocks||{}).forEach(([id,r])=>{if(r.status==="done"&&id!=="fun")c+=PLAIN_IDS.includes(id)?1:(MODES[r.mode]?MODES[r.mode].pts:0)});c+=(x.moves||0)+(x.checks||[]).length});return c}
+const coinBal=()=>coinsEarned()-S.vault.spent.reduce((a,x)=>a+x.cost,0);
+function vaultItems(){if(!S.vault.items)S.vault.items=REWARDS.map((n,i)=>({id:i+1,name:n,cost:[30,45,60,80,100][i]}));return S.vault.items}
+function pVault(){
+  const bal=coinBal(),it=vaultItems();
+  let h=head("🪙 خزانة المكافآت")+`<div class="card" style="text-align:center"><div class="big" style="margin:4px 0">${bal}</div><div class="mute">رصيدك. تكسب من الحصص (ولو إنقاذ) واستراحات الحركة وتسجيل الحالة. لا تُخصم منك أبداً عند التعثر.</div></div>`;
+  h+=it.map(x=>`<div class="card"><div class="row"><div class="grow">${esc(x.name)}<div class="mute">🪙 ${x.cost}</div></div><button class="small" data-sp="${x.id}" ${bal<x.cost?"disabled style='opacity:.4'":""}>اصرف</button><button class="small" data-rmv="${x.id}">✕</button></div></div>`).join("");
+  h+=`<div class="card"><h2>مكافأة جديدة</h2><input id="vN" placeholder="اسم المكافأة" style="width:100%;margin-bottom:6px"><div class="row"><input id="vC" type="number" min="1" value="40" style="width:90px"><button class="small grow" id="vAdd">أضِف</button></div></div>`;
+  if(S.vault.spent.length)h+=`<div class="card"><h2>آخر ما صرفته</h2>${S.vault.spent.slice(-5).reverse().map(x=>`<div class="mute">• ${esc(x.name)} (${x.cost})</div>`).join("")}</div>`;
+  setPg(h);
+  $("pgIn").querySelectorAll("[data-sp]").forEach(b=>b.onclick=()=>{const x=it.find(i=>i.id==b.dataset.sp);if(x&&coinBal()>=x.cost){S.vault.spent.push({name:x.name,cost:x.cost,at:Date.now()});save();beep(3);confetti();drawPanel()}});
+  $("pgIn").querySelectorAll("[data-rmv]").forEach(b=>b.onclick=()=>{S.vault.items=it.filter(i=>i.id!=b.dataset.rmv);save();drawPanel()});
+  $("vAdd").onclick=()=>{const n=$("vN").value.trim(),c=Math.max(1,+$("vC").value||40);if(n){it.push({id:nid(),name:n,cost:c});save();drawPanel()}};
+}
+
+/* تسجيل الحالة + الأنماط */
+let CK={e:0,f:0,s:0};
+const SLP=["أقل من 5","5–6","6–7","7–8","أكثر من 8"];
+const CKL=[["e","⚡ الطاقة",["😴","😐","🙂","😄","🔥"]],["f","🎯 التركيز",["🌫️","😕","😐","🙂","🎯"]],["s","🌊 التوتر (الأعلى = أصعب)",["😌","🙂","😐","😟","😣"]]];
+function checkins(n){const o=[];lastDays(n).forEach(({k,x})=>{if(x)(x.checks||[]).forEach(c=>o.push(Object.assign({day:k,sleep:x.sleep},c)))});return o}
+function patternsHtml(){
+  const c=checkins(30);if(c.length<4)return `<div class="mute">بعد 4 تسجيلات تظهر هنا أنماطك (${c.length}/4).</div>`;
+  const hr=x=>new Date(x.h).getHours(),G=[["الصباح",x=>hr(x)<12],["بعد الظهر",x=>hr(x)>=12&&hr(x)<17],["المساء",x=>hr(x)>=17]];
+  const rows=[];let low=null;
+  G.forEach(([n,fn])=>{const g=c.filter(fn);if(!g.length)return;const e=avg(g.filter(x=>x.e).map(x=>x.e)),f=avg(g.filter(x=>x.f).map(x=>x.f)),s=avg(g.filter(x=>x.s).map(x=>x.s));
+    rows.push(`<div>${n}: طاقة <b>${f1(e)}</b> · تركيز <b>${f1(f)}</b> · توتر <b>${f1(s)}</b> <span class="mute">(${g.length})</span></div>`);if(e&&(!low||e<low.e))low={n,e}});
+  let ins=low?`<div class="msg">أقل طاقة تسجّلها غالباً: <b>${low.n}</b>. ضع الحصص الثقيلة خارج هذا الوقت، واجعله وقت الحصص الخفيفة أو الاستراحة.</div>`:"";
+  const poor=c.filter(x=>x.sleep!=null&&x.sleep<=1&&x.e),good=c.filter(x=>x.sleep!=null&&x.sleep>=3&&x.e);
+  if(poor.length>=2&&good.length>=2)ins+=`<div class="msg">الطاقة بعد نوم أقل من 6 ساعات: <b>${f1(avg(poor.map(x=>x.e)))}</b> مقابل <b>${f1(avg(good.map(x=>x.e)))}</b> بعد 7 ساعات أو أكثر. (ملاحظة إحصائية على بياناتك، لا حكم طبي.)</div>`;
+  return `<h2>📈 أنماطك (آخر 30 يوماً)</h2>${rows.join("")}${ins}`}
+function pCheck(){
+  const d=day();
+  let h=head("📊 كيف حالك الآن؟")+`<p class="mute">ثلاث لمسات بلا أحكام. هذه بيانات لضبط خطتك لا تقييماً لك.</p>`;
+  h+=CKL.map(([k,l,em])=>`<div class="card"><b>${l}</b><div class="moods" style="justify-content:space-between">${em.map((e,i)=>`<button data-cv="${k}${i+1}" style="font-size:26px;padding:8px 10px;${CK[k]===i+1?"outline:2px solid var(--green)":""}">${e}</button>`).join("")}</div></div>`).join("");
+  h+=`<div class="card"><select id="ckSl" style="width:100%"><option value="">😴 كم نمت الليلة الماضية؟ (اختياري)</option>${SLP.map((s,i)=>`<option value="${i}" ${d.sleep===i?"selected":""}>${s} ساعات</option>`).join("")}</select></div>
+   <p><button class="primary" id="ckSave">✓ حفظ (🪙 +1)</button></p><div class="card">${patternsHtml()}</div>`;
+  setPg(h);
+  $("pgIn").querySelectorAll("[data-cv]").forEach(b=>b.onclick=()=>{CK[b.dataset.cv[0]]=+b.dataset.cv[1];drawPanel()});
+  $("ckSl").onchange=e=>{d.sleep=e.target.value===""?undefined:+e.target.value;save()};
+  $("ckSave").onclick=()=>{if(!CK.e&&!CK.f&&!CK.s)return;d.checks.push({h:Date.now(),e:CK.e||null,f:CK.f||null,s:CK.s||null});CK={e:0,f:0,s:0};save();beep(2);closePanel()};
+}
+
+/* الأدوية */
+function medSlots(){const o=[],fmt=x=>String(Math.floor(x/60)%24).padStart(2,"0")+":"+String(x%60).padStart(2,"0");
+  S.meds.forEach(m=>{const t=toMin(m.time);o.push({id:"med"+m.id+"a",time:m.time,med:String(m.id)});o.push({id:"med"+m.id+"b",time:fmt(t+30),med:String(m.id),second:true})});return o}
+function showBar(txt,acts){
+  let b=$("alBar");if(b)b.remove();b=document.createElement("div");b.id="alBar";
+  b.style.cssText="position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;right:10px;max-width:620px;margin:auto;background:var(--card2);border:2px solid var(--yellow);border-radius:16px;padding:14px;z-index:30;box-shadow:0 6px 20px #0008";
+  b.innerHTML=`<div>${esc(txt)}</div><div class="row" style="margin-top:10px">${acts.map((a,i)=>`<button class="grow small" data-a="${i}">${a.l}</button>`).join("")}</div>`;
+  document.body.appendChild(b);beep(1);const t=setTimeout(()=>b.remove(),600000);
+  b.querySelectorAll("[data-a]").forEach(x=>x.onclick=()=>{clearTimeout(t);b.remove();const f=acts[+x.dataset.a].fn;if(f)f()})}
+function checkMeds(){
+  if(!S.meds.length||S.sos)return;
+  const nm=new Date().getHours()*60+new Date().getMinutes(),f=remFired(),d=day();let ch=false;
+  medSlots().forEach(s=>{const t=toMin(s.time);if(nm<t||nm>=t+20||f.ids[s.id])return;f.ids[s.id]=1;ch=true;
+    if(d.meds[s.med])return;const[tt,bb]=remText(s.id);
+    if(document.hidden){if(S.rem.on&&notifOK())showNote(tt,bb,today()+s.id)}
+    else showBar("💊 "+bb,[{l:"✅ أخذته",fn:()=>{d.meds[s.med]=1;save();render()}},{l:"لاحقاً"}])});
+  if(ch)try{localStorage.setItem("train.fired",JSON.stringify(f))}catch(e){}}
+function pMeds(){
+  const d=day();
+  let h=head("💊 أدويتي ومكملاتي")+`<p class="mute">سجّل ما وصفه طبيبك فقط. التطبيق يذكّرك ولا يقترح جرعات ولا يغيّرها. إن نسيت جرعة فاسأل الطبيب أو الصيدلي ولا تضاعفها.</p>`;
+  h+=S.meds.map(m=>`<div class="card"><div class="row"><label class="grow"><input type="checkbox" data-mt="${m.id}" ${d.meds[m.id]?"checked":""}> <b>${esc(m.name)}</b></label><input type="time" data-mtime="${m.id}" value="${m.time}"><button class="small" data-mrm="${m.id}">✕</button></div></div>`).join("")||`<div class="mute">لم تضف شيئاً بعد.</div>`;
+  h+=`<div class="card"><h2>إضافة</h2><input id="mN" placeholder="الاسم كما في الوصفة" style="width:100%;margin-bottom:6px"><div class="row"><input type="time" id="mT" value="08:00"><button class="small grow" id="mAdd">أضِف وذكّرني</button></div></div>
+   <div class="mute">يصلك تذكير في الموعد، وآخر لطيف بعد 30 دقيقة إن لم تسجّل.</div>`;
+  setPg(h);
+  $("pgIn").querySelectorAll("[data-mt]").forEach(c=>c.onchange=()=>{d.meds[c.dataset.mt]=c.checked?1:0;save()});
+  $("pgIn").querySelectorAll("[data-mtime]").forEach(c=>c.onchange=()=>{const m=S.meds.find(x=>x.id==c.dataset.mtime);if(m&&c.value){m.time=c.value;save()}});
+  $("pgIn").querySelectorAll("[data-mrm]").forEach(b=>b.onclick=()=>{S.meds=S.meds.filter(x=>x.id!=b.dataset.mrm);save();drawPanel()});
+  $("mAdd").onclick=()=>{const n=$("mN").value.trim();if(n){S.meds.push({id:nid(),name:n,time:$("mT").value||"08:00"});save();drawPanel()}};
+}
+
+/* سجل الأفكار الملحّة (للملاحظة الذاتية، ليس علاجاً) */
+function ocdStats(){const a=S.ocd.filter(x=>x.a!=null);return{n:S.ocd.length,avgBefore:a.length?+f1(avg(a.map(x=>x.b))):null,avgAfter:a.length?+f1(avg(a.map(x=>x.a))):null}}
+function pOcd(){
+  const st=ocdStats(),pend=S.ocd.filter(x=>x.a==null);
+  let h=head("🛡️ سجل الأفكار الملحّة")+`<p class="mute">لا تكتب محتوى الفكرة إن لم تشأ؛ المهم الشدة قبل الانتظار وبعده. هذا سجل ملاحظة وليس علاجاً. اتفق مع معالجك على التعرّض ومنع الاستجابة (ERP).</p>
+   <div class="card"><b>فكرة ملحّة الآن؟</b><div class="mute">الشدة الآن: <b id="ocB">5</b>/10</div><input type="range" min="0" max="10" value="5" id="ocR">
+   <input id="ocL" placeholder="وصف قصير اختياري (مثلاً: التحقق)" style="width:100%;margin:8px 0"><button class="primary" id="ocGo">🌊 سجّل وابدأ موجة 10 دقائق</button></div>`;
+  h+=pend.map(x=>`<div class="card"><b>سجل مفتوح ${x.label?"· "+esc(x.label):""}</b><div class="mute">الشدة قبل: ${x.b}/10 — كم هي الآن؟ <b id="oa${x.id}">${x.b}</b></div><input type="range" min="0" max="10" value="${x.b}" data-oar="${x.id}"><button class="small" data-oas="${x.id}">حفظ</button></div>`).join("");
+  if(st.avgBefore!=null)h+=`<div class="card"><h2>ما تقوله بياناتك</h2><div>متوسط الشدة قبل الانتظار <b>${st.avgBefore}</b> ← بعده <b>${st.avgAfter}</b> (من ${S.ocd.filter(x=>x.a!=null).length} سجلات)</div>
+    <div class="msg">${st.avgAfter<st.avgBefore?"الموجة تنخفض في المتوسط بعد الانتظار. هذا دليل من بياناتك أنها تمر.":"لا انخفاض واضح بعد في المتوسط. هذه معلومة مفيدة لجلستك العلاجية، لا فشل."}</div></div>`;
+  setPg(h);
+  $("ocR").oninput=e=>{$("ocB").textContent=e.target.value};
+  $("ocGo").onclick=()=>{S.ocd.unshift({id:nid(),at:Date.now(),b:+$("ocR").value,a:null,label:$("ocL").value.trim().slice(0,60)});save();closePanel();$("sosBtn").click()};
+  $("pgIn").querySelectorAll("[data-oar]").forEach(r=>r.oninput=()=>{const e=$("oa"+r.dataset.oar);if(e)e.textContent=r.value});
+  $("pgIn").querySelectorAll("[data-oas]").forEach(b=>b.onclick=()=>{const x=S.ocd.find(o=>o.id==b.dataset.oas),r=$("pgIn").querySelector(`[data-oar="${b.dataset.oas}"]`);if(x){x.a=+r.value;save();beep(2);drawPanel()}});
+}
+
+/* مراجعة الشهر */
+function pMonth(){
+  let cells="";const wk=[0,0,0,0],we=[[],[],[],[]];
+  for(let i=27;i>=0;i--){const dt=new Date();dt.setDate(dt.getDate()-i);const x=S.days[dkey(dt)],n=dayDone(x),w=3-Math.floor(i/7);
+    cells+=`<i class="${n>=4?"on":n>=1?"half":""}" title="${dkey(dt)}"></i>`;wk[w]+=n;if(x)(x.checks||[]).forEach(c=>c.e&&we[w].push(c.e))}
+  const mx=Math.max(1,...wk),names=["قبل 3 أسابيع","قبل أسبوعين","الأسبوع الماضي","هذا الأسبوع"];
+  const activeDays=lastDays(28).filter(z=>dayDone(z.x)>0).length,mean=wk.reduce((a,b)=>a+b,0)/4;
+  let h=head("📅 مراجعة الشهر")+`<div class="card"><h2>آخر 28 يوماً</h2><div class="heat">${cells}</div><div class="mute">🟩 4 حصص فأكثر · 🟨 حصة أو أكثر · ⬛ يوم بلا تسجيل (مجرد بيانات)</div></div>
+   <div class="card"><h2>الحصص المنجزة أسبوعياً</h2>${wk.map((n,i)=>`<div class="mute">${names[i]}: ${n}${we[i].length?` · طاقة ${f1(avg(we[i]))}/5`:""}</div><div class="hb" style="width:${n*100/mx}%"></div>`).join("<div style='height:6px'></div>")}</div>
+   <div class="msg">${activeDays} يوماً نشطاً من 28، بمتوسط ${f1(mean)} حصة أسبوعياً. ${wk[3]>=wk[2]?"الأسبوع الأخير مساوٍ للسابق أو أفضل.":"الأسبوع الأخير أقل؛ هذا تذبذب طبيعي والمتوسط الشهري هو المعيار، لا اليوم الواحد."}</div>`;
+  setPg(h);
+}
+
+/* خزانة الإنجازات */
+function winsList(){const o=[];
+  Object.entries(S.days).forEach(([k,x])=>{const n=dayDone(x);if(n||x.moves||x.sosWins)o.push({k,ic:"✅",t:`${n?`أنجزت ${n} حصة`:"يوم بسعة أقل"}${x.moves?` · ${x.moves} استراحة حركة`:""}${x.sosWins?` · عبرت ${x.sosWins} موجة رغبة`:""}`})});
+  S.dreams.filter(d=>d.state==="dropped"||d.state==="active").forEach(d=>o.push({k:dkey(new Date(d.at)),ic:"💭",t:(d.state==="dropped"?"تركت نزوة دون ذنب: ":"فحصت حلماً بواقعية: ")+d.text.slice(0,60)}));
+  S.ocd.filter(x=>x.a!=null&&x.a<x.b).forEach(x=>o.push({k:dkey(new Date(x.at)),ic:"🛡️",t:`انتظرت فكرة ملحّة فانخفضت شدتها ${x.b}←${x.a}`}));
+  S.wins.forEach(w=>o.push({k:dkey(new Date(w.at)),ic:"🏆",t:w.t,mine:w.id}));
+  return o.sort((a,b)=>b.k<a.k?-1:b.k>a.k?1:0)}
+function pWins(){
+  const L=winsList(),tot=Object.values(S.days).reduce((a,x)=>a+dayDone(x),0),mv=Object.values(S.days).reduce((a,x)=>a+(x.moves||0),0),sw=Object.values(S.days).reduce((a,x)=>a+(x.sosWins||0),0);
+  let h=head("🏆 خزانة الإنجازات")+`<p class="mute">اقرأها عند الهبوط: هذا ما فعلته فعلاً.</p>
+   <div class="card"><span class="chip">✅ ${tot} حصة</span><span class="chip">🚶 ${mv} استراحة حركة</span><span class="chip">🌊 ${sw} موجة عبرتها</span><span class="chip">🔥 ${streakInfo().streak} يوم</span></div>
+   <div class="card"><div class="row"><input id="wN" class="grow" placeholder="سجّل إنجازاً صغيراً أو كبيراً"><button class="small" id="wAdd">أضِف</button></div></div>`;
+  h+=L.length?L.slice(0,80).map(x=>`<div class="card"><div class="mute">${x.k}</div>${x.ic} ${esc(x.t)}${x.mine?` <button class="small" data-wd="${x.mine}">✕</button>`:""}</div>`).join(""):`<div class="mute">ستمتلئ تلقائياً مع كل حصة تنجزها.</div>`;
+  setPg(h);
+  $("wAdd").onclick=()=>{const v=$("wN").value.trim();if(v){S.wins.push({id:nid(),t:v.slice(0,200),at:Date.now()});save();beep(2);drawPanel()}};
+  $("pgIn").querySelectorAll("[data-wd]").forEach(b=>b.onclick=()=>{S.wins=S.wins.filter(w=>w.id!=b.dataset.wd);save();drawPanel()});
+}
+
+/* ملخص الطبيب */
+function docSummary(){
+  const D=14,now=Date.now();let act=0,done=0,skip=0,sos=0,sw=0,mv=0,exp=0,tk=0,sl=0,slPoor=0;
+  lastDays(D).forEach(({x})=>{if(!x)return;act++;Object.values(x.blocks||{}).forEach(b=>b.status==="done"?done++:skip++);sos+=x.sos||0;sw+=x.sosWins||0;mv+=x.moves||0;
+    exp+=S.meds.length;tk+=S.meds.filter(m=>(x.meds||{})[m.id]).length;if(x.sleep!=null){sl++;if(x.sleep<=1)slPoor++}});
+  const c=checkins(D),o=S.ocd.filter(x=>x.at>now-D*864e5),oa=o.filter(x=>x.a!=null),m=k=>f1(avg(c.filter(x=>x[k]).map(x=>x[k])));
+  const L=[`ملخص آخر ${D} يوماً من تطبيق «قطار اليوم» — ${today()}`,`(بيانات ذاتية التسجيل، للنقاش وليست قياساً طبياً)`,"",`أيام مسجّلة: ${act}`,`الحصص: ${done} منجزة، ${skip} مؤجلة`,`استراحات حركة أثناء العمل: ${mv}`];
+  if(S.meds.length)L.push(`تسجيل الأدوية/المكملات: ${exp?Math.round(tk*100/exp):0}% (${tk}/${exp})`);
+  if(sl)L.push(`النوم المسجّل: ${sl} ليلة، منها ${slPoor} أقل من 6 ساعات`);
+  if(c.length)L.push(`الحالة (${c.length} تسجيلاً): طاقة ${m("e")}/5 · تركيز ${m("f")}/5 · توتر ${m("s")}/5 (الأعلى أصعب)`);
+  L.push(`زر الطوارئ: ${sos} مرة، عُبرت منها ${sw}`);
+  if(o.length)L.push(`أفكار ملحّة مسجّلة: ${o.length}`+(oa.length?` — متوسط الشدة قبل ${f1(avg(oa.map(x=>x.b)))} وبعد ${f1(avg(oa.map(x=>x.a)))} (من 10)`:""));
+  return L.join("\n")+(S.docQs.trim()?"\n\nأسئلتي للطبيب:\n"+S.docQs.trim():"")}
+function pDoc(){
+  let h=head("🩺 ملخص زيارة الطبيب")+`<p class="mute">صفحة واحدة تُجمَّع من بياناتك. أضف أسئلتك ثم انسخها أو شاركها قبل الموعد.</p>
+   <div class="card"><h2>أسئلتي للطبيب</h2><textarea id="dq" placeholder="مثلاً: آثار جانبية لاحظتها، أسئلة عن الخطة...">${esc(S.docQs)}</textarea></div>
+   <div class="card"><div class="pre" id="dsum">${esc(docSummary())}</div></div>
+   <div class="row"><button class="primary grow" id="dCopy">📋 نسخ</button>${navigator.share?`<button class="grow" id="dShare">📤 مشاركة</button>`:""}</div>`;
+  setPg(h);
+  $("dq").oninput=e=>{S.docQs=e.target.value;save();$("dsum").textContent=docSummary()};
+  $("dCopy").onclick=async()=>{try{await navigator.clipboard.writeText(docSummary());$("dCopy").textContent="✅ تم النسخ"}catch(e){alert("تعذّر النسخ، حدّد النص يدوياً")}};
+  if($("dShare"))$("dShare").onclick=()=>navigator.share({title:"ملخص قطار اليوم",text:docSummary()}).catch(()=>{});
+}
+
+/* الأمان: قفل PIN ونسخ احتياطي */
+const PINK="train.pin";
+async function sha(t){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){let h=0;for(const c of t)h=(h*31+c.charCodeAt(0))|0;return"x"+h}}
+function pinData(){try{return JSON.parse(localStorage.getItem(PINK))}catch(e){return null}}
+function lockNow(){
+  const p=pinData();if(!p)return;const ov=$("lock");ov.classList.add("show");
+  $("lockIn").innerHTML=`<div style="font-size:44px;margin-top:12vh">🔐</div><h1>قطار اليوم</h1><input id="lockPin" type="password" inputmode="numeric" placeholder="الرمز" style="width:100%;text-align:center;font-size:22px;margin:16px 0"><button class="primary" id="lockGo">فتح</button><div class="mute" id="lockMsg" style="margin-top:8px"></div>`;
+  const go=async()=>{if(await sha($("lockPin").value+p.s)===p.h){ov.classList.remove("show");$("lockIn").innerHTML=""}else{$("lockMsg").textContent="رمز غير صحيح";$("lockPin").value=""}};
+  $("lockGo").onclick=go;$("lockPin").onkeydown=e=>{if(e.key==="Enter")go()};setTimeout(()=>{const i=$("lockPin");if(i)i.focus()},50)}
+let hiddenAt=0;
+document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(pinData()&&hiddenAt&&Date.now()-hiddenAt>60000)lockNow()});
+function exportData(){const{ai,sync,run,sos,...rest}=S;const b=new Blob([JSON.stringify(rest)],{type:"application/json"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download="qitar-backup-"+today()+".json";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function pSec(){
+  const has=!!pinData();
+  let h=head("🔐 الأمان والنسخ الاحتياطي")+`<div class="card"><h2>⬇ نسخة احتياطية</h2><div class="mute" style="margin-bottom:8px">ملف JSON بكل بياناتك (بدون مفاتيح الـ API ولا إعدادات المزامنة).</div>
+   <div class="row wrap"><button class="small" id="exB">⬇ تنزيل نسخة</button><label class="small" style="background:var(--card2);border-radius:14px;padding:8px 12px;cursor:pointer">⬆ استعادة من ملف<input type="file" accept="application/json,.json" id="imF" hidden></label></div></div>
+   <div class="card"><h2>🔐 قفل بالرمز (PIN)</h2><div class="mute" style="margin-bottom:8px">${has?"القفل مفعّل: يُطلب الرمز عند فتح التطبيق وبعد دقيقة من تركه.":"يمنع الاطلاع العابر على بياناتك إن شاركت الجهاز."} الرمز محفوظ على هذا الجهاز فقط. تنبيه: هو حاجز واجهة، والبيانات نفسها غير مشفّرة في المتصفح.</div>
+   <input id="pn1" type="password" inputmode="numeric" placeholder="رمز جديد (4 أرقام فأكثر)" style="width:100%;margin-bottom:6px"><div class="row wrap"><button class="small" id="pnSet">${has?"تغيير الرمز":"تفعيل القفل"}</button>${has?`<button class="small" id="pnOff">إيقاف القفل</button>`:""}</div><div class="mute" id="pnMsg"></div></div>`;
+  setPg(h);
+  $("exB").onclick=exportData;
+  $("imF").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||typeof o.days!=="object")throw 0;
+    if(!confirm("استبدال بياناتك الحالية بمحتوى هذا الملف؟"))return;const keep={ai:S.ai,sync:S.sync};S=Object.assign({},o,keep);norm();save();render();drawPanel()}catch(x){alert("ملف غير صالح")}};r.readAsText(f)};
+  $("pnSet").onclick=async()=>{const v=$("pn1").value;if(!/^\d{4,}$/.test(v)){$("pnMsg").textContent="أدخل 4 أرقام على الأقل";return}
+    const s=String(Math.random()).slice(2);localStorage.setItem(PINK,JSON.stringify({s,h:await sha(v+s)}));drawPanel()};
+  if($("pnOff"))$("pnOff").onclick=()=>{if(confirm("إيقاف القفل؟")){localStorage.removeItem(PINK);drawPanel()}};
+}
+
+/* مظهر يتجدد وحده كل أسبوع */
+const SKINS=[
+ {n:"قطار ليلي",v:"🚂",bg:"#14181f",card:"#1d232d",card2:"#262d3a",text:"#e9edf3",mute:"#8d98aa",line:"#2f384a",acc:"#3fbf7f",ok:"#1f3a2e",r:18},
+ {n:"غابة",v:"🚙",bg:"#0f1a14",card:"#16251c",card2:"#1f3326",text:"#e6f2ea",mute:"#8fb09b",line:"#2a4535",acc:"#7bd88f",ok:"#24442e",r:24},
+ {n:"محيط",v:"🚢",bg:"#0b1824",card:"#122436",card2:"#1a3350",text:"#e4f0fa",mute:"#8aa8c2",line:"#25435f",acc:"#4fc3f7",ok:"#17435a",r:14},
+ {n:"غروب",v:"🚀",bg:"#1c1218",card:"#2a1b24",card2:"#3a2631",text:"#fbebe6",mute:"#c09aa0",line:"#4d3340",acc:"#ff9a62",ok:"#5a3a22",r:28},
+ {n:"نيون",v:"🛸",bg:"#0a0a14",card:"#12121f",card2:"#1c1c33",text:"#eaeaff",mute:"#8a8ac0",line:"#2c2c55",acc:"#b388ff",ok:"#2e2458",r:8},
+ {n:"ورقي دافئ",v:"🚲",bg:"#f4efe6",card:"#fffaf0",card2:"#ece4d4",text:"#2b2620",mute:"#7a6f5e",line:"#d8cdb8",acc:"#3a9d6b",ok:"#cfe8d6",r:20}];
+function skinIdx(){return S.skin.mode==="auto"?Math.floor(Math.max(0,dayNum()-1)/7)%SKINS.length:Math.min(SKINS.length-1,S.skin.idx||0)}
+const curSkin=()=>SKINS[skinIdx()];
+function applySkin(){const k=curSkin(),r=document.documentElement.style;
+  [["--bg",k.bg],["--card",k.card],["--card2",k.card2],["--text",k.text],["--mute",k.mute],["--line",k.line],["--acc",k.acc],["--okbg",k.ok],["--r",k.r+"px"]].forEach(([a,b])=>r.setProperty(a,b));
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=k.bg;const v=$("veh");if(v)v.textContent=k.v}
+function checkSkinReveal(){const i=skinIdx();
+  if(S.skinSeen===undefined){S.skinSeen=i;save();return}
+  if(S.skinSeen!==i&&S.skin.mode==="auto"){S.skinSeen=i;save();confetti();showBar(`🎨 تجدّد شكل نظامك هذا الأسبوع: «${SKINS[i].n}» ${SKINS[i].v}. نظام جديد، نفس خطتك.`,[{l:"👀 رائع"}])}}
+function checkWelcome(){
+  const gap=S.lastOpen?Math.floor((Date.now()-S.lastOpen)/864e5):0;
+  if(gap>=3){S.welcome={gap,day:today()};save();render()}}
+function pSkin(){
+  let h=head("🎨 المظهر")+`<p class="mute">يتبدّل شكل التطبيق وأيقونته تلقائياً كل أسبوع حتى لا يصير مألوفاً فيُهمل. يمكنك تثبيت مظهر تحبه.</p>
+   <div class="card"><label><input type="checkbox" id="skAuto" ${S.skin.mode==="auto"?"checked":""}> تغيير تلقائي كل أسبوع</label></div>`;
+  h+=SKINS.map((k,i)=>`<div class="card" style="background:${k.card};color:${k.text}"><div class="row"><span style="font-size:28px">${k.v}</span><div class="grow"><b>${k.n}</b><div style="display:flex;gap:4px;margin-top:6px">${[k.bg,k.card2,k.acc,k.line].map(c=>`<i style="width:22px;height:22px;border-radius:50%;background:${c};border:1px solid ${k.line}"></i>`).join("")}</div></div>
+    <button class="small" data-sk="${i}" style="background:${k.acc};color:#111">${skinIdx()===i?"✓ الحالي":"استخدم"}</button></div></div>`).join("");
+  setPg(h);
+  $("skAuto").onchange=e=>{if(e.target.checked)S.skin={mode:"auto"};else S.skin={mode:"fixed",idx:skinIdx()};save();applySkin();drawPanel()};
+  $("pgIn").querySelectorAll("[data-sk]").forEach(b=>b.onclick=()=>{S.skin={mode:"fixed",idx:+b.dataset.sk};save();applySkin();drawPanel()});
+}
+
+/* مرساة البدء */
+const ANCH={gym:["ارتدِ الحذاء","املأ زجاجة الماء","اخرج من الباب"],english:["افتح الكتاب/التطبيق","اشرب رشفة ماء","ضع هاتفك بعيداً"],
+  home:["شغّل البودكاست","ضع المؤقت أمامك","التقط أول غرض فقط"],recharge:["كوب ماء","جهّز الوعاء/المنشفة","ابدأ بأول خطوة فقط"]};
+const anchorsFor=id=>ANCH[id]||["اشرب رشفة ماء","أزل أي مشتت أمامك","خذ نفساً بطيئاً"];
+
+/* اختصارات (manifest shortcuts) */
+function handleHash(){const h=location.hash.replace("#","");if(!h)return;
+  const m={note:()=>{openPanel("notes");setTimeout(()=>{const i=$("nQ");if(i)i.focus()},100)},sos:()=>$("sosBtn").click(),check:()=>openPanel("check"),meds:()=>openPanel("meds")};
+  if(m[h])m[h]();try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+window.addEventListener("hashchange",handleHash);
+
+/* ---- المدرب التنفيذي (Tool Use) ---- */
+const BIDS=["launch","work","gym","clinic","recharge","english","home","fun","shutdown"];
+const TOOLS=[
+ {name:"set_block_mode",description:"غيّر وضع حصة اليوم (full=كاملة، mid=متوسطة، rescue=إنقاذ). يظهر فوراً على الشاشة.",input_schema:{type:"object",properties:{block_id:{type:"string",enum:BIDS},mode:{type:"string",enum:["full","mid","rescue"]}},required:["block_id","mode"]}},
+ {name:"postpone_block",description:"أجّل حصة اليوم بدون ذنب (تُعلَّم مؤجَّلة).",input_schema:{type:"object",properties:{block_id:{type:"string",enum:BIDS},reason:{type:"string"}},required:["block_id"]}},
+ {name:"set_block_minutes",description:"عدّل بشكل دائم مدة حصة في وضع معيّن بالدقائق (1–60) للأيام القادمة.",input_schema:{type:"object",properties:{block_id:{type:"string",enum:BIDS},mode:{type:"string",enum:["full","mid","rescue"]},minutes:{type:"integer",minimum:1,maximum:60}},required:["block_id","mode","minutes"]}},
+ {name:"resolve_dream",description:"سجّل نتيجة تحليل حلم من الحاضنة مع ذرات ميكروية.",input_schema:{type:"object",properties:{dream_id:{type:"number"},verdict:{type:"string",enum:["realistic","huge","escape"]},reasoning:{type:"string"},micro_steps:{type:"array",maxItems:3,items:{type:"object",properties:{text:{type:"string"},minutes:{type:"integer",minimum:1,maximum:15},when:{type:"string"}},required:["text","minutes"]}}},required:["dream_id","verdict","reasoning","micro_steps"]}},
+ {name:"save_weekly_report",description:"احفظ تقرير الأسبوع الاحتفالي والمكافأة الحسية الصغيرة.",input_schema:{type:"object",properties:{narrative:{type:"string"},reward:{type:"string"}},required:["narrative","reward"]}},
+ {name:"show_message",description:"أظهر رسالة قصيرة للمستخدم في أعلى الصفحة الرئيسية اليوم.",input_schema:{type:"object",properties:{text:{type:"string"}},required:["text"]}}
+];
+TOOLS.push(
+ {name:"classify_note",description:"صنّف ملاحظة للمستخدم (task/idea/worry) وأضف ذرة ميكروية ≤10 دقائق؛ للفكرة الكبيرة يمكن إيداعها في حاضنة الأحلام.",input_schema:{type:"object",properties:{note_id:{type:"number"},category:{type:"string",enum:["task","idea","worry"]},micro_step:{type:"object",properties:{text:{type:"string"},minutes:{type:"integer",minimum:1,maximum:15}},required:["text","minutes"]},make_dream:{type:"boolean"}},required:["note_id","category"]}},
+ {name:"set_floor",description:"اضبط «الحد الأدنى المضمون» لليوم: الحصة التي يكفي إنجازها لاعتبار اليوم ناجحاً.",input_schema:{type:"object",properties:{block_id:{type:"string",enum:FLOOR_IDS}},required:["block_id"]}}
+);
+const SYSTEM=`أنت المدرب السلوكي داخل تطبيق «قطار اليوم» لمستخدم لديه ADHD وOCD وPTSD ويتابع علاجاً مع طبيب نفسي. أسلوبك: تحليلي مباشر ومختصر بلغة «تقرير كفاءة النظام» دون عبارات عاطفية مبتذلة، إلا إن طلب غير ذلك في ملفه.
+المبادئ:
+1) نفّذ بالأدوات بدل النصائح الإنشائية حين يمكن (set_block_mode, postpone_block, set_block_minutes, show_message...). ثم لخّص ما نفّذته في سطرين.
+2) عند الإرهاق خفّف ولا تزد مهام: حصة إنقاذ منجزة أفضل من إلغاء. لا تزد أي مدة إلا بطلب صريح.
+3) فكّك الأهداف الكبيرة إلى ذرات ≤10–15 دقيقة (عقلية الكل أو لا شيء).
+4) لا تشخّص ولا تعدّل أو تنصح بتعديل الأدوية والجرعات؛ أحِل أي سؤال دوائي أو أعراض جانبية مقلقة إلى الطبيب.
+5) عند أي إشارة لإيذاء النفس: اطلب بهدوء التواصل الفوري مع الطبيب أو الطوارئ ولا تنفّذ أي تعديلات.
+6) أي ادعاء صحي يكون عاماً ومتحفظاً ومبنياً على الأرقام الواردة في السياق فقط؛ لا تخترع أرقاماً (سعرات، نسب).
+7) اقرأ الملف (profile) قبل أي توصية وراعِ نمط مخاطبته المفضّل. أجب بالعربية وباختصار.`;
+function aiContext(){const d=day();return{date:today(),weekday_0_is_sunday:new Date().getDay(),dayNumber:dayNum(),doctorDay:isDoctorDay(new Date()),
+  blocks:B().map(b=>({id:b.id,name:b.name,locked:!!b.locked,status:(d.blocks[b.id]||{}).status||"pending",todayMode:S.sel[b.id]||"full",
+    minutes:b.plain?null:{full:modeMinutes(b,"full"),mid:modeMinutes(b,"mid"),rescue:modeMinutes(b,"rescue")}})),
+  batteryPoints:points(),last7days:weeklyStats(),dreams:S.dreams.map(x=>({id:x.id,text:x.text,state:x.state})),
+  profile:Object.values(S.profile).map(x=>({q:x.q,a:x.a})),
+  streak:streakInfo().streak,floorToday:day().floor||null,water:day().water,
+  checkins:checkins(7).slice(0,12).map(c=>({e:c.e,f:c.f,s:c.s,hour:new Date(c.h).getHours()})),
+  ocd:ocdStats(),medsTakenToday:S.meds.filter(m=>day().meds[m.id]).length+"/"+S.meds.length}}
+async function claude(system,messages){
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":S.ai.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:S.ai.model||DEFAULT_MODEL,max_tokens:6000,system,tools:TOOLS,messages})});
+  const j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||r.status);return j}
+function runTool(name,i,acts){
+  try{
+  if(name==="set_block_mode"){const b=B().find(x=>x.id===i.block_id);if(!b)return"الحصة غير موجودة اليوم";if(b.plain)return"هذه الحصة بلا أوضاع";
+    if(!MODES[i.mode])return"وضع غير صالح";S.sel[b.id]=i.mode;save();acts.push(`${b.name} ← ${MODES[i.mode].em} ${MODES[i.mode].label}`);return"تم"}
+  if(name==="postpone_block"){const b=B().find(x=>x.id===i.block_id);if(!b)return"الحصة غير موجودة اليوم";const d=day();if(d.blocks[b.id])return"الحصة محسومة بالفعل";
+    d.blocks[b.id]={status:"skipped",mode:"rescue"};save();acts.push(`تأجيل: ${b.name}`);return"تم"}
+  if(name==="set_block_minutes"){if(!BIDS.includes(i.block_id)||!MODES[i.mode])return"مدخل غير صالح";const m=Math.min(60,Math.max(1,Math.round(+i.minutes)));
+    S.over.mins[i.block_id]=S.over.mins[i.block_id]||{};S.over.mins[i.block_id][i.mode]=m;save();acts.push(`${i.block_id}/${MODES[i.mode].label} = ${m} دقيقة`);return"تم"}
+  if(name==="resolve_dream"){const d=S.dreams.find(x=>x.id==i.dream_id);if(!d)return"حلم غير موجود";
+    d.verdict=["realistic","huge","escape"].includes(i.verdict)?i.verdict:"unrated";d.reason=String(i.reasoning||"").slice(0,1200);
+    d.steps=(i.micro_steps||[]).slice(0,3).map(x=>({text:String(x.text||"").slice(0,200),minutes:Math.min(15,Math.max(1,Math.round(+x.minutes||10))),when:String(x.when||"").slice(0,80)}));
+    d.state="active";save();acts.push("تحليل حلم");return"تم"}
+  if(name==="save_weekly_report"){S.weekly[wkKey()]={narrative:String(i.narrative||"").slice(0,2000),reward:String(i.reward||"").slice(0,200)};save();acts.push("حفظ تقرير الأسبوع");return"تم"}
+  if(name==="show_message"){S.coachMsg={text:String(i.text||"").slice(0,300),day:today()};save();acts.push("رسالة على الصفحة الرئيسية");return"تم"}
+  if(name==="classify_note"){const n=S.notes.find(x=>x.id==i.note_id);if(!n)return"ملاحظة غير موجودة";
+    n.cat=["task","idea","worry"].includes(i.category)?i.category:undefined;
+    if(i.micro_step&&i.micro_step.text)n.step={text:String(i.micro_step.text).slice(0,200),minutes:Math.min(15,Math.max(1,Math.round(+i.micro_step.minutes||10)))};
+    if(i.make_dream&&n.cat==="idea")S.dreams.push({id:nid(),text:(n.title||noteText(n)).slice(0,300),at:Date.now(),state:"incubating"});
+    n.upd=Date.now();save();acts.push("تصنيف ملاحظة"+(i.make_dream?" + حاضنة الأحلام":""));return"تم"}
+  if(name==="set_floor"){if(!FLOOR_IDS.includes(i.block_id))return"حصة غير صالحة";day().floor=i.block_id;save();acts.push("الحد الأدنى المضمون: "+i.block_id);return"تم"}
+  return"أداة غير معروفة"}catch(e){return"خطأ: "+e.message}}
+async function agent(userText,useHist){
+  const sys=SYSTEM+"\n\n# السياق الحالي (JSON)\n"+JSON.stringify(aiContext());
+  let msgs;
+  if(useHist){msgs=HIST.filter(m=>m.text!=="…").slice(-10).map(m=>({role:m.role,content:m.text}));while(msgs.length&&msgs[0].role!=="user")msgs.shift()}
+  else msgs=[{role:"user",content:userText}];
+  const acts=[];let text="";
+  for(let k=0;k<6;k++){
+    const j=await claude(sys,msgs);
+    msgs.push({role:"assistant",content:j.content});
+    text=j.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
+    const calls=j.content.filter(b=>b.type==="tool_use");
+    if(!calls.length||j.stop_reason!=="tool_use")break;
+    msgs.push({role:"user",content:calls.map(c=>({type:"tool_result",tool_use_id:c.id,content:runTool(c.name,c.input||{},acts)}))});
+  }
+  render();return{text,acts};
+}
+function pCoach(){
+  let h=head("🤖 المدرب (ينفّذ ولا يكتفي بالكلام)");
+  if(!aiOn())h+=`<div class="msg">فعّل مفتاح Anthropic من ⚙️ الإعدادات في الصفحة الرئيسية أولاً.</div>`;
+  h+=`<div>`+HIST.map(m=>`<div class="bub ${m.role}">${esc(m.text)}${(m.acts||[]).map(a=>`<div class="act">⚙️ ${esc(a)}</div>`).join("")}</div>`).join("")+`</div>
+   <div class="row wrap" style="margin:8px 0"><button class="small" data-chip="أنا مرهق جداً اليوم">مرهق اليوم</button><button class="small" data-chip="أنهيت الجيم بنجاح اليوم، ماذا أفاد جسدي؟">أنهيت الجيم</button><button class="small" data-chip="هل حصصي الحالية ثقيلة؟ عدّلها للأسبوع القادم إن لزم">راجع خطتي</button></div>
+   <textarea id="cIn" placeholder="اكتب للمدرب..."></textarea><p><button class="primary" id="cSend">إرسال</button></p>`;
+  setPg(h);
+  $("pgIn").querySelectorAll("[data-chip]").forEach(b=>b.onclick=()=>sendCoach(b.dataset.chip));
+  $("cSend").onclick=()=>sendCoach($("cIn").value.trim());
+}
+async function sendCoach(text){
+  if(BUSY||!text)return;if(!aiOn()){PG="coach";drawPanel();return}
+  BUSY=true;HIST.push({role:"user",text});HIST.push({role:"assistant",text:"…"});PG="coach";drawPanel();
+  try{const r=await agent(text,true);HIST[HIST.length-1]={role:"assistant",text:r.text||"تم.",acts:r.acts}}
+  catch(e){HIST[HIST.length-1]={role:"assistant",text:"تعذّر الاتصال: "+e.message}}
+  BUSY=false;if(PG==="coach")drawPanel();
+}
+
+/* ============ المزامنة (Supabase REST، اختيارية) ============ */
+let pushT=null,pulling=false;
+function syncOn(){return S&&S.sync&&S.sync.url&&S.sync.key&&S.sync.id}
+function hdr(){return{apikey:S.sync.key,Authorization:"Bearer "+S.sync.key,"Content-Type":"application/json"}}
+function pushSoon(){if(!syncOn())return;clearTimeout(pushT);pushT=setTimeout(pushNow,800)}
+function syncData(){const{run,sos,sel,sync,ai,...rest}=S;return rest}
+async function pushNow(){if(!syncOn())return;
+  try{await fetch(S.sync.url+"/rest/v1/train_state",{method:"POST",headers:{...hdr(),Prefer:"resolution=merge-duplicates"},
+    body:JSON.stringify({id:S.sync.id,data:syncData(),updated_at:new Date().toISOString()})})}catch(e){}
+  try{await fetch(S.sync.url+"/rest/v1/user_neuro_profile",{method:"POST",headers:{...hdr(),Prefer:"resolution=merge-duplicates"},
+    body:JSON.stringify({id:S.sync.id,profile:S.profile||{},answered:totalAnswered(),updated_at:new Date().toISOString()})})}catch(e){}}
+function doneCount(x){return Object.values((x.days&&x.days[today()]||{blocks:{}}).blocks).filter(b=>b.status==="done").length}
+async function pullNow(){if(!syncOn()||pulling)return;pulling=true;
+  try{const r=await fetch(S.sync.url+"/rest/v1/train_state?id=eq."+encodeURIComponent(S.sync.id)+"&select=data",{headers:hdr()});
+    const rows=await r.json();
+    if(!rows.length){await pushNow();return}
+    const rd=rows[0].data;
+    if((rd.updatedAt||0)>(S.updatedAt||0)){
+      const before=doneCount(S),keep={run:S.run,sos:S.sos,sel:S.sel,sync:S.sync,ai:S.ai};
+      S=Object.assign({},rd,keep);norm();
+      try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+      render();
+      if(doneCount(S)>before){const c=currentBlock();beep(3);
+        try{new Notification("انتهت حصة على جهاز آخر",{body:c?"الحصة التالية: "+c.name:"انتهى قطار اليوم"})}catch(e){}}
+    }else if((rd.updatedAt||0)<(S.updatedAt||0)){await pushNow()}
+  }catch(e){}finally{pulling=false}}
+setInterval(pullNow,6000);
+
+/* ============ دورة التحديث ============ */
+/* احتفالية نهاية الأسبوع: تفتح تلقائياً مرة واحدة كل أسبوع (خميس/جمعة بعد 6 م) */
+function checkWeekly(){const d=new Date();
+  if(![4,5].includes(d.getDay())||d.getHours()<18||isNight()||S.weeklyShown===wkKey()||S.run||S.sos||PG)return;
+  S.weeklyShown=wkKey();save();openPanel("weekly");confetti();beep(3)}
+function tick(){checkDreams();checkWeekly();checkReminders();checkMove();checkMeds();runTick();renderRun();renderNight();if(S.sos)renderSos();}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){render();tick()}});
+load();applySkin();checkWelcome();render();tick();setInterval(tick,1000);lockNow();handleHash();checkSkinReveal();
+// يوم جديد → أعد الرسم
+let lastDay=today();setInterval(()=>{if(today()!==lastDay){lastDay=today();render()}},30000);
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").then(()=>{if(S.rem.on&&notifOK()){regPeriodic();pushCfg()}}).catch(()=>{});
+</script>
+</body>
+</html>

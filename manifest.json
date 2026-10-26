@@ -1,0 +1,25 @@
+{
+  "name": "قطار اليوم — نظام التشغيل العصبي التكيفي",
+  "short_name": "قطار اليوم",
+  "description": "جدول حصص سلوكي تكيفي مع تنبيهات وتذكيرات وحكمة اليوم",
+  "id": "./index.html",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14181f",
+  "theme_color": "#14181f",
+  "categories": ["health", "productivity", "lifestyle"],
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "ملاحظة سريعة", "short_name": "ملاحظة", "url": "./index.html#note"},
+    {"name": "طوارئ: رغبة ملحّة", "short_name": "طوارئ", "url": "./index.html#sos"},
+    {"name": "كيف حالك الآن؟", "short_name": "حالتي", "url": "./index.html#check"},
+    {"name": "الأدوية", "short_name": "الأدوية", "url": "./index.html#meds"}
+  ]
+}
